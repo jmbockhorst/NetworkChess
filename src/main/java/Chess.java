@@ -1,5 +1,7 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -19,13 +21,15 @@ public class Chess extends Application {
     String player = "w";
     String opponent = "b";
 
+    CellPane[][] boardDisplay = new CellPane[8][8];
     Cell[][] board = new Cell[8][8];
-    boolean[][] moves = new boolean[8][8];
-    Cell movingCell;
+    List<Move> activeMoves = new ArrayList<>();
+
+    CellPane movingCell;
     boolean moving = false;
 
-    String cpuChar = "b";
-    String humanChar = "w";
+    static String cpuChar = "b";
+    static String humanChar = "w";
     int positionCount = 0;
 
     boolean gameOver = false;
@@ -39,11 +43,13 @@ public class Chess extends Application {
         GridPane pane = new GridPane();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                pane.add(board[i][j] = new Cell(this, i, j), j, i);
+                board[i][j] = new Cell(i, j);
+                pane.add(boardDisplay[i][j] = new CellPane(this, board[i][j]), j, i);
+
                 if (j % 2 == 0 ^ i % 2 == 0) {
-                    board[i][j].setStyle("-fx-background-color: #e29b3d");
+                    boardDisplay[i][j].setStyle("-fx-background-color: #e29b3d");
                 } else {
-                    board[i][j].setStyle("-fx-background-color: #f7ca8f");
+                    boardDisplay[i][j].setStyle("-fx-background-color: #f7ca8f");
                 }
             }
         }
@@ -85,39 +91,10 @@ public class Chess extends Application {
         return true;
     }
 
-    public ArrayList<Move> getMoves(Cell[][] cells, String player) {
-        ArrayList<Move> moveList = new ArrayList<Move>();
-
-        String opponent = (player == "w") ? "b" : "w";
-
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (cells[i][j].getToken().startsWith(player)) {
-                    cells[i][j].findMoves(player, opponent);
-
-                    for (int a = 0; a < 8; a++) {
-                        for (int b = 0; b < 8; b++) {
-                            if (moves[a][b]) {
-                                moveList.add(new Move(this, cells[i][j], cells[a][b]));
-                            }
-                        }
-                    }
-
-                    clearMoves();
-                }
-            }
-        }
-
-        // Collections.sort(moveList, new SortMove());
-        moveList.sort(Comparator.comparing(Move::getValue).reversed());
-
-        return moveList;
-    }
-
     private void resetGame() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                board[i][j].setToken("");
+                boardDisplay[i][j].setImage("");
                 setUpBoard();
                 player = "w";
             }
@@ -147,17 +124,27 @@ public class Chess extends Application {
             board[1][i].setToken("bp");
             board[6][i].setToken("wp");
         }
+
+        refreshBoard();
+    }
+
+    public void refreshBoard(){
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                boardDisplay[i][j].refreshCell();
+            }
+        }
     }
 
     public void clearMoves() {
+        activeMoves.clear();
+
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                moves[i][j] = false;
-
                 if (j % 2 == 0 ^ i % 2 == 0) {
-                    board[i][j].setStyle("-fx-background-color: #e29b3d");
+                    boardDisplay[i][j].setStyle("-fx-background-color: #e29b3d");
                 } else {
-                    board[i][j].setStyle("-fx-background-color: #f7ca8f");
+                    boardDisplay[i][j].setStyle("-fx-background-color: #f7ca8f");
                 }
             }
         }
@@ -167,6 +154,6 @@ public class Chess extends Application {
 class SortMove implements Comparator<Move> {
     @Override
     public int compare(Move o1, Move o2) {
-        return (o1.value > o2.value) ? o1.value : o2.value;
+        return (o1.getValue() > o2.getValue()) ? o1.getValue() : o2.getValue();
     }
 }

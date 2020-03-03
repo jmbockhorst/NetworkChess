@@ -1,17 +1,15 @@
 public class Move {
-    private final Chess chess;
     public Cell fromCell;
     public Cell toCell;
 
     private String tempCell;
-    public int value = 0;
+    private int value = 0;
 
-    public Move(Chess chess, Cell fromCell, Cell toCell) {
-        this.chess = chess;
+    public Move(Cell fromCell, Cell toCell) {
         this.fromCell = fromCell;
         this.toCell = toCell;
 
-        value = Piece.value(toCell.getToken(), chess.humanChar);
+        value = toCell.getValue();
     }
 
     public void makeMove() {
@@ -21,18 +19,11 @@ public class Move {
     }
 
     public void undoMove() {
-        fromCell.setTokenText(toCell.getToken());
-        toCell.setTokenText(tempCell);
-    }
-
-    void makeTempMove() {
-        tempCell = toCell.getToken();
-        toCell.setTokenText(fromCell.getToken());
-        fromCell.setTokenText("");
+        fromCell.setToken(toCell.getToken());
+        toCell.setToken(tempCell);
     }
 
     public int getValue() {
         return value;
     }
-
 }
