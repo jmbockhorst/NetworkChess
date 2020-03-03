@@ -24,7 +24,15 @@ public class Chess extends Application {
     Cell movingCell;
     boolean moving = false;
 
+    String cpuChar = "b";
+    String humanChar = "w";
+    int positionCount = 0;
+
+    boolean gameOver = false;
+
     Label status = new Label("Your turn");
+
+    CPU cpu;
 
     @Override
     public void start(Stage primaryStage) {
@@ -41,6 +49,7 @@ public class Chess extends Application {
         }
 
         setUpBoard();
+        cpu = new CPU(cpuChar, this);
 
         status.setFont(Font.font("Times New Roman", 24));
 
@@ -53,7 +62,7 @@ public class Chess extends Application {
         BorderPane.setAlignment(status, Pos.CENTER);
 
         Scene scene = new Scene(borderPane, 600, 600);
-        primaryStage.setTitle("Tic Tac Toe");
+        primaryStage.setTitle("Chess");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -74,101 +83,6 @@ public class Chess extends Application {
         }
 
         return true;
-    }
-
-    String cpuChar = "b";
-    String humanChar = "w";
-    int positionCount = 0;
-
-    private int alphaBeta(Cell[][] cells, int alpha, int beta, int depth, boolean isMax) {
-        positionCount++;
-
-        if (depth == 0) {
-            return -evaluateBoard(cells);
-        }
-
-        if (isMax) {
-            ArrayList<Move> maxMoveList = getMoves(cells, cpuChar);
-
-            int bestMove = -9999;
-
-            for (int i = 0; i < maxMoveList.size(); i++) {
-                Move move = maxMoveList.get(i);
-                move.makeTempMove();
-
-                bestMove = Math.max(bestMove, alphaBeta(cells, alpha, beta, depth - 1, false));
-
-                move.undoMove();
-
-                alpha = Math.max(alpha, bestMove);
-                if (beta <= alpha) {
-                    break;
-                }
-            }
-
-            return bestMove;
-        } else {
-            ArrayList<Move> minMoveList = getMoves(cells, humanChar);
-
-            int bestMove = 9999;
-
-            for (int i = 0; i < minMoveList.size(); i++) {
-                Move move = minMoveList.get(i);
-                move.makeTempMove();
-
-                bestMove = Math.min(bestMove, alphaBeta(cells, alpha, beta, depth - 1, true));
-
-                move.undoMove();
-
-                beta = Math.min(beta, bestMove);
-                if (beta <= alpha) {
-                    break;
-                }
-            }
-
-            return bestMove;
-        }
-    }
-
-    boolean gameOver = false;
-
-    public void cpuPlay() {
-        int depth = 6;
-        int alpha = -10000;
-        int beta = 10000;
-
-        positionCount = 0;
-
-        ArrayList<Move> maxMoveList = getMoves(board, cpuChar);
-
-        int bestMove = -9999;
-        int bestInt = 0;
-
-        for (int i = 0; i < maxMoveList.size(); i++) {
-            Move move = maxMoveList.get(i);
-            move.makeTempMove();
-
-            bestMove = Math.max(bestMove, alphaBeta(board, alpha, beta, depth - 1, false));
-
-            move.undoMove();
-
-            if (bestMove > alpha) {
-                alpha = bestMove;
-                bestInt = i;
-            }
-
-            if (beta <= alpha) {
-                break;
-            }
-        }
-
-        if (maxMoveList.get(bestInt).toCell.getToken().endsWith("k")) {
-            gameOver = true;
-        }
-
-        maxMoveList.get(bestInt).makeMove();
-
-        System.out.println(positionCount);
     }
 
     public ArrayList<Move> getMoves(Cell[][] cells, String player) {
@@ -198,35 +112,6 @@ public class Chess extends Application {
         moveList.sort(Comparator.comparing(Move::getValue).reversed());
 
         return moveList;
-    }
-
-    public int evaluateBoard(Cell[][] cells) {
-        int total = 0;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                total += getPieceValue(cells[i][j]);
-            }
-        }
-
-        return total;
-    }
-
-    public int getPieceValue(Cell cell) {
-        int absValue = 0;
-        if (cell.getToken().endsWith("p"))
-            absValue = 10;
-        else if (cell.getToken().endsWith("r"))
-            absValue = 50;
-        else if (cell.getToken().endsWith("n"))
-            absValue = 30;
-        else if (cell.getToken().endsWith("b"))
-            absValue = 30;
-        else if (cell.getToken().endsWith("q"))
-            absValue = 90;
-        else if (cell.getToken().endsWith("k"))
-            absValue = 900;
-
-        return (cell.getToken().startsWith(humanChar)) ? absValue : -absValue;
     }
 
     private void resetGame() {

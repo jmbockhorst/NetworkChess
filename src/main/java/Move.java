@@ -11,7 +11,7 @@ public class Move {
         this.fromCell = fromCell;
         this.toCell = toCell;
 
-        value = this.chess.getPieceValue(toCell);
+        value = Piece.value(toCell.getToken(), chess.humanChar);
     }
 
     public void makeMove() {

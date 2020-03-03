@@ -114,7 +114,7 @@ public class Cell extends Pane {
 
     private void mouseReleased() {
         if (chess.player == "b") {
-            chess.cpuPlay();
+            chess.cpu.makeBestMove();
 
             if (chess.gameOver) {
                 chess.status.setText("GAME OVER! Black wins");
