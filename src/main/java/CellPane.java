@@ -77,6 +77,7 @@ public class CellPane extends Pane {
                 chess.movingCell = null;
                 chess.clearMoves();
                 chess.refreshBoard();
+                chess.lastUpdate = System.currentTimeMillis();
 
                 if (!gameOver) {
                     // Switch turn

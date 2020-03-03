@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import javafx.application.Application;
@@ -24,7 +23,7 @@ public class Chess extends Application {
     private Player player1 = new Player(PlayerType.HUMAN, PLAYER1_CHAR);
     private Player player2 = new Player(PlayerType.CPU, PLAYER2_CHAR);
 
-    private Player currentPlayer = player1;
+    private Player currentPlayer = player2;
 
     CellPane[][] boardDisplay = new CellPane[8][8];
     Cell[][] board = new Cell[8][8];
@@ -33,10 +32,12 @@ public class Chess extends Application {
     Cell movingCell = null;
 
     boolean gameOver = false;
-    Label status = new Label("Your turn");
+    Label status = new Label();
 
     CPU cpu1;
     CPU cpu2;
+
+    long lastUpdate = 0;
 
     @Override
     public void start(Stage primaryStage) {
@@ -72,6 +73,8 @@ public class Chess extends Application {
         primaryStage.setTitle("Chess");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        switchPlayerTurn();
     }
 
     public boolean checkWin(char token) {
@@ -153,13 +156,13 @@ public class Chess extends Application {
     }
 
     public void cpuTurn() {
-        CPU cpu = currentPlayer == player1 ? cpu1 : cpu2;
+        CPU cpu = getCurrentCPU();
 
-        long time = System.currentTimeMillis();
         Move move = cpu.getBestMove();
+        move.makeMove();
 
         // Always wait at least 1 second
-        long calcTime = System.currentTimeMillis() - time;
+        long calcTime = System.currentTimeMillis() - lastUpdate;
         if (calcTime < 1000) {
             try {
                 Thread.sleep(1000 - calcTime);
@@ -168,21 +171,18 @@ public class Chess extends Application {
             }
         }
 
-        move.makeMove();
+        refreshBoard();
+        lastUpdate = System.currentTimeMillis();
 
         if (move.toCell.getToken().endsWith("k")) {
             gameOver = true;
         }
 
-        refreshBoard();
-
         if (gameOver) {
             status.setText("GAME OVER! Black wins");
             currentPlayer = null;
         } else {
-            switchPlayerTurn();
-
-            status.setText("Your turn");
+            Platform.runLater(() -> switchPlayerTurn());
         }
     }
 
@@ -192,6 +192,19 @@ public class Chess extends Application {
         if (currentPlayer.getType() == PlayerType.CPU) {
             status.setText("CPU is thinking...");
             Platform.runLater(() -> cpuTurn());
+
+        } else {
+            if (player1.getType() == PlayerType.HUMAN && player2.getType() == PlayerType.HUMAN) {
+                if (currentPlayer == player1) {
+                    status.setText("Player 1's turn");
+                } else {
+                    status.setText("Player 2's turn");
+                }
+            } else {
+                status.setText("Your turn");
+            }
+
+            new GetBestHumanMove(this).start();
         }
     }
 
@@ -202,11 +215,23 @@ public class Chess extends Application {
     public Player getCurrentPlayerOpponent() {
         return currentPlayer == player1 ? player2 : player1;
     }
+
+    public CPU getCurrentCPU() {
+        return currentPlayer == player1 ? cpu1 : cpu2;
+    }
 }
 
-class SortMove implements Comparator<Move> {
+class GetBestHumanMove extends Thread {
+    private Chess chess;
+
+    public GetBestHumanMove(Chess chess) {
+        this.chess = chess;
+    }
+
     @Override
-    public int compare(Move o1, Move o2) {
-        return (o1.getValue() > o2.getValue()) ? o1.getValue() : o2.getValue();
+    public void run() {
+        CPU cpu = chess.getCurrentCPU();
+
+        System.out.println("Your best move is: " + cpu.getBestMove());
     }
 }
