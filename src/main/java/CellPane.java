@@ -8,6 +8,7 @@ import javafx.scene.layout.Pane;
  */
 public class CellPane extends Pane {
     private Chess chess;
+    private String imageName = "";
     int i;
     int j;
     private Cell cell;
@@ -24,6 +25,8 @@ public class CellPane extends Pane {
     }
 
     public void setImage(String token) {
+        imageName = token;
+
         this.getChildren().clear();
 
         if (token != "") {
@@ -39,8 +42,10 @@ public class CellPane extends Pane {
         }
     }
 
-    public void refreshCell(){
-        setImage(cell.getToken());
+    public void refreshCell() {
+        if (imageName != cell.getToken()) {
+            setImage(cell.getToken());
+        }
 
         // Check if this is an active move
         if (chess.moving && chess.activeMoves.stream().anyMatch(move -> move.toCell == cell)) {
@@ -50,47 +55,41 @@ public class CellPane extends Pane {
 
     private void handleMouseClick() {
         if (chess.player == Chess.humanChar) {
-            if (chess.moving) {
-                if (chess.activeMoves.stream().anyMatch(move -> move.toCell == cell)) {
-                    boolean gameOver = false;
+            if (chess.moving && chess.activeMoves.stream().anyMatch(move -> move.toCell == cell)) {
+                boolean gameOver = false;
 
-                    if (cell.getToken().startsWith(chess.opponent)) {
-                        if (cell.getToken().endsWith("k")) {
-                            if (chess.player == "w") {
-                                chess.status.setText("GAME OVER! White wins");
-                            } else if (chess.player == "b") {
-                                chess.status.setText("GAME OVER! Black wins");
-                            }
-
-                            chess.player = "";
-                            chess.opponent = "";
-                            gameOver = true;
+                if (cell.getToken().startsWith(chess.opponent)) {
+                    if (cell.getToken().endsWith("k")) {
+                        if (chess.player == "w") {
+                            chess.status.setText("GAME OVER! White wins");
+                        } else if (chess.player == "b") {
+                            chess.status.setText("GAME OVER! Black wins");
                         }
+
+                        chess.player = "";
+                        chess.opponent = "";
+                        gameOver = true;
                     }
-
-                    // Move Cell
-                    cell.setToken("");
-                    cell.setToken(chess.movingCell.cell.getToken());
-                    chess.movingCell.setImage("");
-                    chess.movingCell = null;
-                    chess.moving = false;
-                    chess.clearMoves();
-
-                    if (!gameOver) {
-                        // Switch turn
-                        chess.player = (chess.player == "w") ? "b" : "w";
-                        chess.opponent = (chess.opponent == "w") ? "b" : "w";
-
-                        chess.status.setText("CPU is thinking...");
-                    }
-                } else if (cell.getToken().contains(chess.player)) {
-                    chess.clearMoves();
-                    chess.activeMoves.addAll(cell.findMoves(chess.board, chess.player, chess.opponent));
-                    chess.refreshBoard();
                 }
-            } else {
+
+                // Move Cell
+                cell.setToken("");
+                cell.setToken(chess.movingCell.getToken());
+                chess.movingCell = null;
+                chess.moving = false;
+                chess.clearMoves();
+
+                if (!gameOver) {
+                    // Switch turn
+                    chess.player = (chess.player == "w") ? "b" : "w";
+                    chess.opponent = (chess.opponent == "w") ? "b" : "w";
+
+                    chess.status.setText("CPU is thinking...");
+                }
+            } else if (cell.getToken().contains(chess.player)) {
+                chess.clearMoves();
+                chess.movingCell = cell;
                 chess.activeMoves.addAll(cell.findMoves(chess.board, chess.player, chess.opponent));
-                chess.moving = true;
                 chess.refreshBoard();
             }
         }

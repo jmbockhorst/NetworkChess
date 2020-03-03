@@ -25,7 +25,7 @@ public class Chess extends Application {
     Cell[][] board = new Cell[8][8];
     List<Move> activeMoves = new ArrayList<>();
 
-    CellPane movingCell;
+    Cell movingCell;
     boolean moving = false;
 
     static String cpuChar = "b";
@@ -128,7 +128,7 @@ public class Chess extends Application {
         refreshBoard();
     }
 
-    public void refreshBoard(){
+    public void refreshBoard() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 boardDisplay[i][j].refreshCell();
