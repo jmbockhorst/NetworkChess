@@ -48,14 +48,14 @@ public class CellPane extends Pane {
         }
 
         // Check if this is an active move
-        if (chess.moving && chess.activeMoves.stream().anyMatch(move -> move.toCell == cell)) {
+        if (chess.movingCell != null && chess.activeMoves.stream().anyMatch(move -> move.toCell == cell)) {
             setStyle("-fx-background-color: #999999");
         }
     }
 
     private void handleMouseClick() {
         if (chess.player == Chess.humanChar) {
-            if (chess.moving && chess.activeMoves.stream().anyMatch(move -> move.toCell == cell)) {
+            if (chess.movingCell != null && chess.activeMoves.stream().anyMatch(move -> move.toCell == cell)) {
                 boolean gameOver = false;
 
                 if (cell.getToken().startsWith(chess.opponent)) {
@@ -77,7 +77,6 @@ public class CellPane extends Pane {
                 // Move Cell
                 move.makeMove();
                 chess.movingCell = null;
-                chess.moving = false;
                 chess.clearMoves();
                 chess.refreshBoard();
 
@@ -93,12 +92,13 @@ public class CellPane extends Pane {
 
             } else if (cell.getToken().contains(chess.player)) {
                 chess.clearMoves();
-                chess.moving = true;
                 chess.movingCell = cell;
                 chess.activeMoves.addAll(cell.findMoves(chess.board, chess.player, chess.opponent));
                 chess.refreshBoard();
+            } else {
+                chess.clearMoves();
+                chess.movingCell = null;
             }
         }
     }
-
 }

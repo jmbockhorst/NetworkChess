@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -25,8 +24,7 @@ public class Chess extends Application {
     Cell[][] board = new Cell[8][8];
     List<Move> activeMoves = new ArrayList<>();
 
-    Cell movingCell;
-    boolean moving = false;
+    Cell movingCell = null;
 
     static String cpuChar = "b";
     static String humanChar = "w";
