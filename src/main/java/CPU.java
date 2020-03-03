@@ -3,12 +3,14 @@ import java.util.Comparator;
 
 public class CPU {
 
-    private String cpuChar;
-    private Chess chess;
+    private Cell[][] board;
+    private Player cpuPlayer;
+    private Player opponentPlayer;
 
-    public CPU(String cpuChar, Chess chess) {
-        this.cpuChar = cpuChar;
-        this.chess = chess;
+    public CPU(Cell[][] board, Player cpuPlayer, Player opponentPlayer) {
+        this.board = board;
+        this.cpuPlayer = cpuPlayer;
+        this.opponentPlayer = opponentPlayer;
     }
 
     public Move getBestMove() {
@@ -16,7 +18,7 @@ public class CPU {
         int alpha = -10000;
         int beta = 10000;
 
-        ArrayList<Move> maxMoveList = getMoves(chess.board, cpuChar);
+        ArrayList<Move> maxMoveList = getMoves(board, cpuPlayer, opponentPlayer);
 
         int bestMove = -9999;
         int bestInt = 0;
@@ -25,7 +27,7 @@ public class CPU {
             Move move = maxMoveList.get(i);
             move.makeMove();
 
-            bestMove = Math.max(bestMove, alphaBeta(chess.board, alpha, beta, depth - 1, false));
+            bestMove = Math.max(bestMove, alphaBeta(board, alpha, beta, depth - 1, false));
 
             move.undoMove();
 
@@ -39,10 +41,6 @@ public class CPU {
             }
         }
 
-        if (maxMoveList.get(bestInt).toCell.getToken().endsWith("k")) {
-            chess.gameOver = true;
-        }
-
         return maxMoveList.get(bestInt);
     }
 
@@ -52,7 +50,7 @@ public class CPU {
         }
 
         if (isMax) {
-            ArrayList<Move> maxMoveList = getMoves(cells, cpuChar);
+            ArrayList<Move> maxMoveList = getMoves(cells, cpuPlayer, opponentPlayer);
 
             int bestMove = -9999;
 
@@ -72,7 +70,7 @@ public class CPU {
 
             return bestMove;
         } else {
-            ArrayList<Move> minMoveList = getMoves(cells, chess.humanChar);
+            ArrayList<Move> minMoveList = getMoves(cells, opponentPlayer, cpuPlayer);
 
             int bestMove = 9999;
 
@@ -98,22 +96,20 @@ public class CPU {
         int total = 0;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                total += Piece.value(cells[i][j].getToken());
+                total += Piece.value(cells[i][j].getToken(), opponentPlayer.getCharacter());
             }
         }
 
         return total;
     }
 
-    private ArrayList<Move> getMoves(Cell[][] cells, String player) {
+    private ArrayList<Move> getMoves(Cell[][] cells, Player player, Player opponent) {
         ArrayList<Move> moveList = new ArrayList<>();
-
-        String opponent = (player == "w") ? "b" : "w";
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                if (cells[i][j].getToken().startsWith(player)) {
-                    moveList.addAll(cells[i][j].findMoves(cells, player, opponent));
+                if (cells[i][j].getToken().startsWith(player.getCharacter())) {
+                    moveList.addAll(cells[i][j].findMoves(cells, player.getCharacter(), opponent.getCharacter()));
                 }
             }
         }

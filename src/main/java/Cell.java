@@ -5,7 +5,6 @@ public class Cell {
     private String token;
     private int i;
     private int j;
-    private int value;
 
     public Cell(int i, int j) {
         this.i = i;
@@ -19,7 +18,6 @@ public class Cell {
 
     public void setToken(String token) {
         this.token = token;
-        this.value = Piece.value(token);
     }
 
     public int getI() {
@@ -28,10 +26,6 @@ public class Cell {
 
     public int getJ() {
         return j;
-    }
-
-    public int getValue() {
-        return value;
     }
 
     public List<Move> findMoves(Cell[][] board, String player, String opponent) {
@@ -43,14 +37,14 @@ public class Cell {
                 if (i == 6) {
                     Cell toCell = board[i - 2][j];
                     if (!toCell.getToken().startsWith(player) && !toCell.getToken().startsWith(opponent)) {
-                        moves.add(new Move(this, toCell));
+                        moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                     }
                 }
             } else if (player == "b") {
                 if (i == 1) {
                     Cell toCell = board[i + 2][j];
                     if (!toCell.getToken().startsWith(player) && !toCell.getToken().startsWith(opponent)) {
-                        moves.add(new Move(this, toCell));
+                        moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                     }
                 }
             }
@@ -66,21 +60,21 @@ public class Cell {
             if (i - 1 >= 0 && i + 1 < 8) {
                 Cell toCell = board[i - 1 * m][j];
                 if (!toCell.getToken().startsWith(player) && !toCell.getToken().startsWith(opponent)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i - 1 >= 0 && i + 1 < 8 && j - 1 >= 0) {
                 Cell toCell = board[i - 1 * m][j - 1];
                 if (toCell.getToken().startsWith(opponent)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i - 1 >= 0 && i + 1 < 8 && j + 1 < 8) {
                 Cell toCell = board[i - 1 * m][j + 1];
                 if (toCell.getToken().startsWith(opponent)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
         }
@@ -91,28 +85,28 @@ public class Cell {
             if (i - 2 >= 0 && j - 1 >= 0) {
                 Cell toCell = board[i - 2][j - 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i - 2 >= 0 && j + 1 < 8) {
                 Cell toCell = board[i - 2][j + 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i + 2 < 8 && j - 1 >= 0) {
                 Cell toCell = board[i + 2][j - 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i + 2 < 8 && j + 1 < 8) {
                 Cell toCell = board[i + 2][j + 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
@@ -120,28 +114,28 @@ public class Cell {
             if (i - 1 >= 0 && j - 2 >= 0) {
                 Cell toCell = board[i - 1][j - 2];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i - 1 >= 0 && j + 2 < 8) {
                 Cell toCell = board[i - 1][j + 2];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i + 1 < 8 && j - 2 >= 0) {
                 Cell toCell = board[i + 1][j - 2];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i + 1 < 8 && j + 2 < 8) {
                 Cell toCell = board[i + 1][j + 2];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
         }
@@ -152,7 +146,7 @@ public class Cell {
             for (int a = i + 1; a < 8; a++) {
                 Cell toCell = board[a][j];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
 
                     if (toCell.getToken().startsWith(opponent)) {
                         break;
@@ -165,7 +159,7 @@ public class Cell {
             for (int a = i - 1; a >= 0; a--) {
                 Cell toCell = board[a][j];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
 
                     if (toCell.getToken().startsWith(opponent)) {
                         break;
@@ -179,7 +173,7 @@ public class Cell {
             for (int a = j + 1; a < 8; a++) {
                 Cell toCell = board[i][a];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
 
                     if (toCell.getToken().startsWith(opponent)) {
                         break;
@@ -192,7 +186,7 @@ public class Cell {
             for (int a = j - 1; a >= 0; a--) {
                 Cell toCell = board[i][a];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
 
                     if (toCell.getToken().startsWith(opponent)) {
                         break;
@@ -213,7 +207,7 @@ public class Cell {
                 if (b < 8) {
                     Cell toCell = board[a][b];
                     if (!toCell.getToken().startsWith(player)) {
-                        moves.add(new Move(this, toCell));
+                        moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
 
                         if (toCell.getToken().startsWith(opponent)) {
                             break;
@@ -231,7 +225,7 @@ public class Cell {
                 if (b >= 0) {
                     Cell toCell = board[a][b];
                     if (!toCell.getToken().startsWith(player)) {
-                        moves.add(new Move(this, toCell));
+                        moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
 
                         if (toCell.getToken().startsWith(opponent)) {
                             break;
@@ -250,7 +244,7 @@ public class Cell {
                 if (b >= 0) {
                     Cell toCell = board[a][b];
                     if (!toCell.getToken().startsWith(player)) {
-                        moves.add(new Move(this, toCell));
+                        moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
 
                         if (toCell.getToken().startsWith(opponent)) {
                             break;
@@ -268,7 +262,7 @@ public class Cell {
                 if (b < 8) {
                     Cell toCell = board[a][b];
                     if (!toCell.getToken().startsWith(player)) {
-                        moves.add(new Move(this, toCell));
+                        moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
 
                         if (toCell.getToken().startsWith(opponent)) {
                             break;
@@ -286,56 +280,56 @@ public class Cell {
             if (i - 1 >= 0) {
                 Cell toCell = board[i - 1][j];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i - 1 >= 0 && j - 1 >= 0) {
                 Cell toCell = board[i - 1][j - 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i + 1 < 8) {
                 Cell toCell = board[i + 1][j];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i + 1 < 8 && j + 1 < 8) {
                 Cell toCell = board[i + 1][j + 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i + 1 < 8 && j - 1 >= 0) {
                 Cell toCell = board[i + 1][j - 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (i - 1 >= 0 && j + 1 < 8) {
                 Cell toCell = board[i - 1][j + 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (j + 1 < 8) {
                 Cell toCell = board[i][j + 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
 
             if (j - 1 >= 0) {
                 Cell toCell = board[i][j - 1];
                 if (!toCell.getToken().startsWith(player)) {
-                    moves.add(new Move(this, toCell));
+                    moves.add(new Move(this, toCell, Piece.value(toCell.getToken(), opponent)));
                 }
             }
         }

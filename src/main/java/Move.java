@@ -3,13 +3,12 @@ public class Move {
     public Cell toCell;
 
     private String tempCell;
-    private int value = 0;
+    private int value;
 
-    public Move(Cell fromCell, Cell toCell) {
+    public Move(Cell fromCell, Cell toCell, int value) {
         this.fromCell = fromCell;
         this.toCell = toCell;
-
-        value = toCell.getValue();
+        this.value = value;
     }
 
     public void makeMove() {

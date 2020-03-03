@@ -1,5 +1,5 @@
 public class Piece {
-    public static int value(String piece) {
+    public static int value(String piece, String opponentChar) {
         int absValue = 0;
         if (piece.endsWith("p"))
             absValue = 10;
@@ -14,6 +14,6 @@ public class Piece {
         else if (piece.endsWith("k"))
             absValue = 900;
 
-        return (piece.startsWith(Chess.humanChar)) ? absValue : -absValue;
+        return (piece.startsWith(opponentChar)) ? absValue : -absValue;
     }
 }

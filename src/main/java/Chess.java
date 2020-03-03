@@ -3,6 +3,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,8 +18,13 @@ public class Chess extends Application {
         Application.launch(args);
     }
 
-    String player = "w";
-    String opponent = "b";
+    final static String PLAYER1_CHAR = "w";
+    final static String PLAYER2_CHAR = "b";
+
+    private Player player1 = new Player(PlayerType.HUMAN, PLAYER1_CHAR);
+    private Player player2 = new Player(PlayerType.CPU, PLAYER2_CHAR);
+
+    private Player currentPlayer = player1;
 
     CellPane[][] boardDisplay = new CellPane[8][8];
     Cell[][] board = new Cell[8][8];
@@ -26,12 +32,7 @@ public class Chess extends Application {
 
     Cell movingCell = null;
 
-    static String cpuChar = "b";
-    static String humanChar = "w";
-    int positionCount = 0;
-
     boolean gameOver = false;
-
     Label status = new Label("Your turn");
 
     CPU cpu;
@@ -53,7 +54,7 @@ public class Chess extends Application {
         }
 
         setUpBoard();
-        cpu = new CPU(cpuChar, this);
+        cpu = new CPU(board, player2, player1);
 
         status.setFont(Font.font("Times New Roman", 24));
 
@@ -90,13 +91,14 @@ public class Chess extends Application {
     }
 
     private void resetGame() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                boardDisplay[i][j].setImage("");
-                setUpBoard();
-                player = "w";
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                board[i][j].setToken("");
             }
         }
+
+        setUpBoard();
+        currentPlayer = player1;
     }
 
     private void setUpBoard() {
@@ -149,34 +151,52 @@ public class Chess extends Application {
     }
 
     public void cpuTurn() {
-        if (player == "b") {
-            long time = System.currentTimeMillis();
-            Move move = cpu.getBestMove();
+        long time = System.currentTimeMillis();
+        Move move = cpu.getBestMove();
 
-            // Always wait at least 1 second
-            long calcTime = System.currentTimeMillis() - time;
-            if(calcTime < 1000){
-                try {
-                    Thread.sleep(1000 - calcTime);
-                } catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-            }
-
-            move.makeMove();
-            refreshBoard();
-
-            if (gameOver) {
-                status.setText("GAME OVER! Black wins");
-                player = "";
-            } else {
-
-                player = (player == "w") ? "b" : "w";
-                opponent = (opponent == "w") ? "b" : "w";
-
-                status.setText("Your turn");
+        // Always wait at least 1 second
+        long calcTime = System.currentTimeMillis() - time;
+        if (calcTime < 1000) {
+            try {
+                Thread.sleep(1000 - calcTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
+
+        move.makeMove();
+
+        if (move.toCell.getToken().endsWith("k")) {
+            gameOver = true;
+        }
+
+        refreshBoard();
+
+        if (gameOver) {
+            status.setText("GAME OVER! Black wins");
+            currentPlayer = null;
+        } else {
+            switchPlayerTurn();
+
+            status.setText("Your turn");
+        }
+    }
+
+    public void switchPlayerTurn() {
+        currentPlayer = currentPlayer == player1 ? player2 : player1;
+
+        if (currentPlayer.getType() == PlayerType.CPU) {
+            status.setText("CPU is thinking...");
+            Platform.runLater(() -> cpuTurn());
+        }
+    }
+
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public Player getCurrentPlayerOpponent(){
+        return currentPlayer == player1 ? player2 : player1;
     }
 }
 
