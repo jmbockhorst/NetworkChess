@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class CPU {
 
@@ -18,22 +19,27 @@ public class CPU {
         int alpha = -10000;
         int beta = 10000;
 
-        ArrayList<Move> maxMoveList = getMoves(board, cpuPlayer, opponentPlayer);
+        List<Move> maxMoveList = getMoves(board, cpuPlayer, opponentPlayer);
 
-        int bestMove = -9999;
-        int bestInt = 0;
+        Move best = maxMoveList.get(0);
+
+        List<Move> tiedMoves = new ArrayList<>();
 
         for (int i = 0; i < maxMoveList.size(); i++) {
             Move move = maxMoveList.get(i);
             move.makeMove();
 
-            bestMove = Math.max(bestMove, alphaBeta(board, alpha, beta, depth - 1, false));
+            int moveScore = alphaBeta(board, alpha, beta, depth - 1, false);
 
             move.undoMove();
 
-            if (bestMove > alpha) {
-                alpha = bestMove;
-                bestInt = i;
+            if (moveScore > alpha) {
+                alpha = moveScore;
+                best = move;
+
+                tiedMoves.clear();
+            } else if(moveScore == alpha){
+                tiedMoves.add(move);
             }
 
             if (beta <= alpha) {
@@ -41,7 +47,11 @@ public class CPU {
             }
         }
 
-        return maxMoveList.get(bestInt);
+        if(tiedMoves.size() > 0){
+            best = tiedMoves.get((int)(Math.random() * tiedMoves.size()));
+        }
+
+        return best;
     }
 
     private int alphaBeta(Cell[][] cells, int alpha, int beta, int depth, boolean isMax) {

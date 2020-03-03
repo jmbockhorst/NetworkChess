@@ -336,4 +336,13 @@ public class Cell {
 
         return moves;
     }
+
+    @Override
+    public String toString() {
+        return "Cell{" +
+                "token='" + token + '\'' +
+                ", i=" + i +
+                ", j=" + j +
+                '}';
+    }
 }

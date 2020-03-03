@@ -35,7 +35,8 @@ public class Chess extends Application {
     boolean gameOver = false;
     Label status = new Label("Your turn");
 
-    CPU cpu;
+    CPU cpu1;
+    CPU cpu2;
 
     @Override
     public void start(Stage primaryStage) {
@@ -54,7 +55,8 @@ public class Chess extends Application {
         }
 
         setUpBoard();
-        cpu = new CPU(board, player2, player1);
+        cpu1 = new CPU(board, player1, player2);
+        cpu2 = new CPU(board, player2, player1);
 
         status.setFont(Font.font("Times New Roman", 24));
 
@@ -151,6 +153,8 @@ public class Chess extends Application {
     }
 
     public void cpuTurn() {
+        CPU cpu = currentPlayer == player1 ? cpu1 : cpu2;
+
         long time = System.currentTimeMillis();
         Move move = cpu.getBestMove();
 
@@ -195,7 +199,7 @@ public class Chess extends Application {
         return currentPlayer;
     }
 
-    public Player getCurrentPlayerOpponent(){
+    public Player getCurrentPlayerOpponent() {
         return currentPlayer == player1 ? player2 : player1;
     }
 }

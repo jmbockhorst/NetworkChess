@@ -25,4 +25,13 @@ public class Move {
     public int getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+                "fromCell=" + fromCell +
+                ", toCell=" + toCell +
+                ", value=" + value +
+                '}';
+    }
 }
