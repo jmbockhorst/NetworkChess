@@ -149,6 +149,37 @@ public class Chess extends Application {
             }
         }
     }
+
+    public void cpuTurn() {
+        if (player == "b") {
+            long time = System.currentTimeMillis();
+            Move move = cpu.getBestMove();
+
+            // Always wait at least 1 second
+            long calcTime = System.currentTimeMillis() - time;
+            if(calcTime < 1000){
+                try {
+                    Thread.sleep(1000 - calcTime);
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+
+            move.makeMove();
+            refreshBoard();
+
+            if (gameOver) {
+                status.setText("GAME OVER! Black wins");
+                player = "";
+            } else {
+
+                player = (player == "w") ? "b" : "w";
+                opponent = (opponent == "w") ? "b" : "w";
+
+                status.setText("Your turn");
+            }
+        }
+    }
 }
 
 class SortMove implements Comparator<Move> {

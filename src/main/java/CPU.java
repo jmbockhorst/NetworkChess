@@ -11,7 +11,7 @@ public class CPU {
         this.chess = chess;
     }
 
-    public void makeBestMove() {
+    public Move getBestMove() {
         int depth = 6;
         int alpha = -10000;
         int beta = 10000;
@@ -43,7 +43,7 @@ public class CPU {
             chess.gameOver = true;
         }
 
-        maxMoveList.get(bestInt).makeMove();
+        return maxMoveList.get(bestInt);
     }
 
     private int alphaBeta(Cell[][] cells, int alpha, int beta, int depth, boolean isMax) {

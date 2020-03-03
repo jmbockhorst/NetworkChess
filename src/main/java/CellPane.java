@@ -1,4 +1,5 @@
 
+import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -18,7 +19,6 @@ public class CellPane extends Pane {
         this.setPrefSize(2000, 2000);
 
         this.setOnMouseClicked(e -> handleMouseClick());
-        this.setOnMouseMoved(e -> mouseReleased());
 
         this.chess = chess;
         this.cell = cell;
@@ -72,12 +72,14 @@ public class CellPane extends Pane {
                     }
                 }
 
+                Move move = chess.activeMoves.stream().filter(m -> m.toCell == cell).findFirst().get();
+
                 // Move Cell
-                cell.setToken("");
-                cell.setToken(chess.movingCell.getToken());
+                move.makeMove();
                 chess.movingCell = null;
                 chess.moving = false;
                 chess.clearMoves();
+                chess.refreshBoard();
 
                 if (!gameOver) {
                     // Switch turn
@@ -86,28 +88,15 @@ public class CellPane extends Pane {
 
                     chess.status.setText("CPU is thinking...");
                 }
+
+                Platform.runLater(() -> chess.cpuTurn());
+
             } else if (cell.getToken().contains(chess.player)) {
                 chess.clearMoves();
+                chess.moving = true;
                 chess.movingCell = cell;
                 chess.activeMoves.addAll(cell.findMoves(chess.board, chess.player, chess.opponent));
                 chess.refreshBoard();
-            }
-        }
-    }
-
-    private void mouseReleased() {
-        if (chess.player == "b") {
-            chess.cpu.makeBestMove();
-
-            if (chess.gameOver) {
-                chess.status.setText("GAME OVER! Black wins");
-                chess.player = "";
-            } else {
-
-                chess.player = (chess.player == "w") ? "b" : "w";
-                chess.opponent = (chess.opponent == "w") ? "b" : "w";
-
-                chess.status.setText("Your turn");
             }
         }
     }
