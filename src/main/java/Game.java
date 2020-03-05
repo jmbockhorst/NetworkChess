@@ -1,6 +1,8 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import player.PlayerType;
+import views.Chess;
 
 public class Game extends Application {
 

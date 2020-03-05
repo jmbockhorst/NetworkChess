@@ -1,3 +1,5 @@
+package player;
+
 public class Player {
     private PlayerType type;
     private String character;
@@ -14,10 +16,4 @@ public class Player {
     public String getCharacter() {
         return character;
     }
-}
-
-enum PlayerType {
-    HUMAN,
-    CPU,
-    NETWORK
 }

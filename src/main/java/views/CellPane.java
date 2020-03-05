@@ -1,10 +1,13 @@
+package views;
 
+import chess.Cell;
+import chess.Move;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import player.PlayerType;
 
 /**
- * Cell
  */
 public class CellPane extends Pane {
     private Chess chess;
@@ -74,7 +77,7 @@ public class CellPane extends Pane {
 
                 Move move = chess.activeMoves.stream().filter(m -> m.toCell == cell).findFirst().get();
 
-                // Move Cell
+                // chess.Move chess.Cell
                 move.makeMove();
                 chess.movingCell = null;
                 chess.clearMoves();

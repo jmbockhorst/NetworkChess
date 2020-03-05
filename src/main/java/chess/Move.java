@@ -1,3 +1,5 @@
+package chess;
+
 public class Move {
     public Cell fromCell;
     public Cell toCell;

@@ -1,3 +1,5 @@
+package chess;
+
 public class Piece {
     public static int value(String piece, String opponentChar) {
         int absValue = 0;

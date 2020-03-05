@@ -1,3 +1,5 @@
+package views;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -6,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import chess.CPU;
+import chess.Cell;
+import chess.Move;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,10 +20,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
+import player.Player;
+import player.PlayerType;
 
 public class Chess {
-    final static String PLAYER1_CHAR = "w";
-    final static String PLAYER2_CHAR = "b";
+    public final static String PLAYER1_CHAR = "w";
+    public final static String PLAYER2_CHAR = "b";
 
     private Player player1 = new Player(PlayerType.HUMAN, PLAYER1_CHAR);
     private Player player2;
@@ -252,7 +260,7 @@ public class Chess {
     private void networkTurn() {
         try {
             // Send the board if needed
-            if(sendNetworkData) {
+            if (sendNetworkData) {
                 outputStream.writeUTF(objectMapper.writeValueAsString(board));
                 outputStream.flush();
             }

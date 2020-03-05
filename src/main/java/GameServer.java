@@ -1,5 +1,12 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import chess.CPU;
+import chess.Cell;
+import chess.Move;
+import player.Player;
+import player.PlayerType;
+import views.Chess;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;

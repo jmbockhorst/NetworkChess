@@ -1,6 +1,10 @@
+package chess;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import player.Player;
 
 public class CPU {
 
@@ -38,7 +42,7 @@ public class CPU {
                 best = move;
 
                 tiedMoves.clear();
-            } else if(moveScore == alpha){
+            } else if (moveScore == alpha) {
                 tiedMoves.add(move);
             }
 
@@ -47,8 +51,8 @@ public class CPU {
             }
         }
 
-        if(tiedMoves.size() > 0){
-            best = tiedMoves.get((int)(Math.random() * tiedMoves.size()));
+        if (tiedMoves.size() > 0) {
+            best = tiedMoves.get((int) (Math.random() * tiedMoves.size()));
         }
 
         return best;

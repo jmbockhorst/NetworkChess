@@ -1,3 +1,5 @@
+package chess;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -6,7 +8,7 @@ public class Cell {
     private int i;
     private int j;
 
-    public Cell(){
+    public Cell() {
 
     }
 
@@ -343,10 +345,6 @@ public class Cell {
 
     @Override
     public String toString() {
-        return "Cell{" +
-                "token='" + token + '\'' +
-                ", i=" + i +
-                ", j=" + j +
-                '}';
+        return "Cell{" + "token='" + token + '\'' + ", i=" + i + ", j=" + j + '}';
     }
 }
