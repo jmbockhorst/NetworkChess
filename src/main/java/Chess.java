@@ -44,12 +44,17 @@ public class Chess {
     DataOutputStream outputStream;
     ObjectMapper objectMapper;
 
+    boolean gameReady = true;
+    boolean sendNetworkData = true;
+
     public Chess(PlayerType opponentType) {
         player2 = new Player(opponentType, PLAYER2_CHAR);
         currentPlayer = player2;
 
         // Set up the network if needed
         if (opponentType == PlayerType.NETWORK) {
+            gameReady = false;
+
             try {
                 socket = new Socket("localhost", 8000);
                 inputStream = new DataInputStream(socket.getInputStream());
@@ -96,7 +101,40 @@ public class Chess {
     }
 
     public void start() {
-        switchPlayerTurn();
+        if (!gameReady) {
+            status.setText("Waiting on player...");
+        }
+
+        try {
+            if (player2.getType() == PlayerType.NETWORK) {
+                // Wait for the game to start
+                String str;
+                while (!(str = inputStream.readUTF()).startsWith("start"))
+                    ;
+
+                // Get the player id
+                int player = Integer.valueOf(str.substring(str.length() - 1));
+
+                System.out.println("Player id: " + player);
+
+                // If we are player 2, swap the players
+                if (player == 2) {
+                    player1 = new Player(PlayerType.NETWORK, PLAYER1_CHAR);
+                    player2 = new Player(PlayerType.HUMAN, PLAYER2_CHAR);
+
+                    currentPlayer = player2;
+
+                    // Don't send data at the beginning
+                    sendNetworkData = false;
+                }
+
+                setUpBoard();
+            }
+
+            switchPlayerTurn();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean checkWin(char token) {
@@ -158,7 +196,10 @@ public class Chess {
     public void refreshBoard() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                boardDisplay[i][j].refreshCell(board[i][j]);
+                // Swap the row and col if it should be
+                int row = player1.getType() == PlayerType.NETWORK ? 7 - i : i;
+                int col = player1.getType() == PlayerType.NETWORK ? 7 - j : j;
+                boardDisplay[i][j].refreshCell(board[row][col]);
             }
         }
     }
@@ -204,27 +245,30 @@ public class Chess {
             status.setText("GAME OVER! Black wins");
             currentPlayer = null;
         } else {
-            Platform.runLater(() -> switchPlayerTurn());
+            Platform.runLater(this::switchPlayerTurn);
         }
     }
 
     private void networkTurn() {
         try {
-            // Send the board
-            outputStream.writeUTF(objectMapper.writeValueAsString(board));
-            outputStream.flush();
-
-            System.out.println("Game sent data");
+            // Send the board if needed
+            if(sendNetworkData) {
+                outputStream.writeUTF(objectMapper.writeValueAsString(board));
+                outputStream.flush();
+            }
 
             // Wait for the new board
-            String str = "";
-            while ((str = inputStream.readUTF()).equals(""));
+            String str;
+            while ((str = inputStream.readUTF()).equals(""))
+                ;
 
             board = objectMapper.readValue(str, Cell[][].class);
             refreshBoard();
 
-            switchPlayerTurn();
-        } catch (IOException e){
+            // Always send data from now on
+            sendNetworkData = true;
+            Platform.runLater(this::switchPlayerTurn);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -234,10 +278,9 @@ public class Chess {
 
         if (currentPlayer.getType() == PlayerType.CPU) {
             status.setText("CPU is thinking...");
-            Platform.runLater(() -> cpuTurn());
+            Platform.runLater(this::cpuTurn);
         } else if (currentPlayer.getType() == PlayerType.NETWORK) {
             status.setText("Waiting on player...");
-
             Platform.runLater(() -> networkTurn());
         } else {
             if (player1.getType() == PlayerType.HUMAN && player2.getType() == PlayerType.HUMAN) {
