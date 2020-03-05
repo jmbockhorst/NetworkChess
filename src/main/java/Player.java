@@ -18,5 +18,6 @@ public class Player {
 
 enum PlayerType {
     HUMAN,
-    CPU
+    CPU,
+    NETWORK
 }

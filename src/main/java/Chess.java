@@ -1,7 +1,11 @@
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.application.Application;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -10,20 +14,15 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
-import javafx.stage.Stage;
 
-public class Chess extends Application {
-    public static void main(String[] args) {
-        Application.launch(args);
-    }
-
+public class Chess {
     final static String PLAYER1_CHAR = "w";
     final static String PLAYER2_CHAR = "b";
 
     private Player player1 = new Player(PlayerType.HUMAN, PLAYER1_CHAR);
-    private Player player2 = new Player(PlayerType.CPU, PLAYER2_CHAR);
+    private Player player2;
 
-    private Player currentPlayer = player2;
+    private Player currentPlayer;
 
     CellPane[][] boardDisplay = new CellPane[8][8];
     Cell[][] board = new Cell[8][8];
@@ -39,8 +38,30 @@ public class Chess extends Application {
 
     long lastUpdate = 0;
 
-    @Override
-    public void start(Stage primaryStage) {
+    // Needed for network games
+    Socket socket;
+    DataInputStream inputStream;
+    DataOutputStream outputStream;
+    ObjectMapper objectMapper;
+
+    public Chess(PlayerType opponentType) {
+        player2 = new Player(opponentType, PLAYER2_CHAR);
+        currentPlayer = player2;
+
+        // Set up the network if needed
+        if (opponentType == PlayerType.NETWORK) {
+            try {
+                socket = new Socket("localhost", 8000);
+                inputStream = new DataInputStream(socket.getInputStream());
+                outputStream = new DataOutputStream(socket.getOutputStream());
+                objectMapper = new ObjectMapper();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public Scene getScene() {
         GridPane pane = new GridPane();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -70,10 +91,11 @@ public class Chess extends Application {
         BorderPane.setAlignment(status, Pos.CENTER);
 
         Scene scene = new Scene(borderPane, 600, 600);
-        primaryStage.setTitle("Chess");
-        primaryStage.setScene(scene);
-        primaryStage.show();
 
+        return scene;
+    }
+
+    public void start() {
         switchPlayerTurn();
     }
 
@@ -136,7 +158,7 @@ public class Chess extends Application {
     public void refreshBoard() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                boardDisplay[i][j].refreshCell();
+                boardDisplay[i][j].refreshCell(board[i][j]);
             }
         }
     }
@@ -186,13 +208,37 @@ public class Chess extends Application {
         }
     }
 
+    private void networkTurn() {
+        try {
+            // Send the board
+            outputStream.writeUTF(objectMapper.writeValueAsString(board));
+            outputStream.flush();
+
+            System.out.println("Game sent data");
+
+            // Wait for the new board
+            String str = "";
+            while ((str = inputStream.readUTF()).equals(""));
+
+            board = objectMapper.readValue(str, Cell[][].class);
+            refreshBoard();
+
+            switchPlayerTurn();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
     public void switchPlayerTurn() {
         currentPlayer = currentPlayer == player1 ? player2 : player1;
 
         if (currentPlayer.getType() == PlayerType.CPU) {
             status.setText("CPU is thinking...");
             Platform.runLater(() -> cpuTurn());
+        } else if (currentPlayer.getType() == PlayerType.NETWORK) {
+            status.setText("Waiting on player...");
 
+            Platform.runLater(() -> networkTurn());
         } else {
             if (player1.getType() == PlayerType.HUMAN && player2.getType() == PlayerType.HUMAN) {
                 if (currentPlayer == player1) {
@@ -204,7 +250,7 @@ public class Chess extends Application {
                 status.setText("Your turn");
             }
 
-            new GetBestHumanMove(this).start();
+            // new GetBestHumanMove(this).start();
         }
     }
 

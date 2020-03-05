@@ -39,7 +39,9 @@ public class CellPane extends Pane {
         }
     }
 
-    public void refreshCell() {
+    public void refreshCell(Cell cell) {
+        this.cell = cell;
+
         if (imageName != cell.getToken()) {
             setImage(cell.getToken());
         }
@@ -60,9 +62,9 @@ public class CellPane extends Pane {
 
                 if (cell.getToken().startsWith(opponentChar)) {
                     if (cell.getToken().endsWith("k")) {
-                        if (playerChar == "w") {
+                        if (playerChar.equals("w")) {
                             chess.status.setText("GAME OVER! White wins");
-                        } else if (playerChar == "b") {
+                        } else if (playerChar.equals("b")) {
                             chess.status.setText("GAME OVER! Black wins");
                         }
 

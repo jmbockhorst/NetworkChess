@@ -4,3 +4,4 @@
 .project
 org.eclipse.*
 target
+bin
