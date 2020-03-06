@@ -4,6 +4,7 @@ import javafx.stage.Stage;
 import player.PlayerType;
 import views.Chess;
 import views.MainMenu;
+import views.NetworkMenu;
 
 public class Game extends Application {
 
@@ -23,9 +24,8 @@ public class Game extends Application {
             primaryStage.setScene(chess.getScene());
             chess.start();
         }, e -> {
-            Chess chess = new Chess(PlayerType.NETWORK);
-            primaryStage.setScene(chess.getScene());
-            chess.start();
+            NetworkMenu networkMenu = new NetworkMenu(primaryStage);
+            primaryStage.setScene(networkMenu.getScene());
         });
 
         primaryStage.setScene(menuScene);

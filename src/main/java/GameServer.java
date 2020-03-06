@@ -1,8 +1,6 @@
+import chess.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import chess.CPU;
-import chess.Cell;
-import chess.Move;
 import player.Player;
 import player.PlayerType;
 import views.Chess;
@@ -12,6 +10,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GameServer {
     public static void main(String[] args) {
@@ -19,15 +20,16 @@ public class GameServer {
     }
 
     ServerSocket serverSocket;
-    Socket socket;
+    List<NetworkGame> availableGames;
 
     public GameServer() {
         try {
             serverSocket = new ServerSocket(8000);
+            availableGames = new ArrayList<>();
 
             while (true) {
-                socket = serverSocket.accept();
-                new Thread(new TwoPlayerConnectionHandler(socket, serverSocket.accept())).start();
+                // Handle when a new connection is made
+                new Thread(new NetworkGameHandler(serverSocket.accept(), availableGames)).start();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -36,6 +38,87 @@ public class GameServer {
                 serverSocket.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
+            }
+        }
+    }
+}
+
+class NetworkGameHandler implements Runnable {
+    Socket socket;
+    DataInputStream inputStream;
+    DataOutputStream outputStream;
+    ObjectMapper objectMapper;
+    List<NetworkGame> availableGames;
+
+    public NetworkGameHandler(Socket socket, List<NetworkGame> availableGames) {
+        this.socket = socket;
+        this.availableGames = availableGames;
+
+        try {
+            inputStream = new DataInputStream(socket.getInputStream());
+            outputStream = new DataOutputStream(socket.getOutputStream());
+            objectMapper = new ObjectMapper();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void run() {
+        boolean waitingToStart = true;
+
+        while (waitingToStart) {
+            try {
+                String str;
+                while ((str = inputStream.readUTF()).equals(""))
+                    ;
+
+                // Send the list of games
+                if (str.equals("listGames")) {
+                    System.out.println("Server - list games: " + availableGames.size());
+
+                    // Create the list of games to send to the client
+                    List<NetworkGameClient> clientGames = availableGames.stream().map(game -> new NetworkGameClient(game.getGameId(), game.getName())).collect(Collectors.toList());
+
+                    outputStream.writeUTF(objectMapper.writeValueAsString(clientGames));
+                    outputStream.flush();
+                }
+
+                // Process the join game request
+                if (str.startsWith("join")) {
+                    int gameId = Integer.valueOf(str.substring(str.length() - 1));
+                    System.out.println("Server - join game: " + gameId);
+
+                    // Start the game thread
+                    NetworkGame gameToJoin = availableGames.stream().filter(game -> game.getGameId() == gameId)
+                            .findFirst().get();
+                    new Thread(new TwoPlayerConnectionHandler(gameToJoin.getPlayer1Socket(), socket)).start();
+
+                    availableGames.removeIf(game -> game.getGameId() == gameId);
+
+                    waitingToStart = false;
+                }
+
+                // Process the create game request
+                if (str.startsWith("create")) {
+                    System.out.println("Server - create game");
+                    int nextGameId = availableGames.size() == 0 ? 0
+                            : availableGames.stream().mapToInt(NetworkGame::getGameId).max().getAsInt() + 1;
+                    String gameName = str.split("-")[1];
+
+                    availableGames.add(new NetworkGame(nextGameId, gameName, socket));
+
+                    waitingToStart = false;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                waitingToStart = false;
+
+                try {
+                    socket.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }

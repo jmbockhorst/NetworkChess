@@ -55,7 +55,11 @@ public class Chess {
     boolean gameReady = true;
     boolean sendNetworkData = true;
 
-    public Chess(PlayerType opponentType) {
+    public Chess(PlayerType opponentType){
+        this(opponentType, null);
+    }
+
+    public Chess(PlayerType opponentType, Socket socket) {
         player2 = new Player(opponentType, PLAYER2_CHAR);
         currentPlayer = player2;
 
@@ -64,7 +68,12 @@ public class Chess {
             gameReady = false;
 
             try {
-                socket = new Socket("localhost", 8000);
+                if(socket != null){
+                    this.socket = socket;
+                } else {
+                    this.socket = new Socket("localhost", 8000);
+                }
+
                 inputStream = new DataInputStream(socket.getInputStream());
                 outputStream = new DataOutputStream(socket.getOutputStream());
                 objectMapper = new ObjectMapper();
