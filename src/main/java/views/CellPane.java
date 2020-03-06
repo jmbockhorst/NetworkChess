@@ -29,16 +29,12 @@ public class CellPane extends Pane {
 
         this.getChildren().clear();
 
-        if (token != "") {
-            this.getChildren().clear();
-
-            ImageView image = new ImageView(new Image(getClass().getResourceAsStream(token + ".png")));
+        if (!token.equals("")) {
+            ImageView image = new ImageView(new Image(getClass().getResourceAsStream("/" + token + ".png")));
             image.setFitWidth(75);
             image.setFitHeight(70);
 
             this.getChildren().add(image);
-        } else {
-            this.getChildren().clear();
         }
     }
 

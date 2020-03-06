@@ -3,6 +3,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import player.PlayerType;
 import views.Chess;
+import views.MainMenu;
 
 public class Game extends Application {
 
@@ -12,13 +13,23 @@ public class Game extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Chess chess = new Chess(PlayerType.NETWORK);
-        Scene scene = chess.getScene();
 
-        primaryStage.setScene(scene);
+        Scene menuScene = MainMenu.getScene(e -> {
+            Chess chess = new Chess(PlayerType.CPU);
+            primaryStage.setScene(chess.getScene());
+            chess.start();
+        }, e -> {
+            Chess chess = new Chess(PlayerType.HUMAN);
+            primaryStage.setScene(chess.getScene());
+            chess.start();
+        }, e -> {
+            Chess chess = new Chess(PlayerType.NETWORK);
+            primaryStage.setScene(chess.getScene());
+            chess.start();
+        });
+
+        primaryStage.setScene(menuScene);
         primaryStage.setTitle("Chess");
         primaryStage.show();
-
-        chess.start();
     }
 }

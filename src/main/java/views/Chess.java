@@ -103,9 +103,7 @@ public class Chess {
         borderPane.setBottom(status);
         BorderPane.setAlignment(status, Pos.CENTER);
 
-        Scene scene = new Scene(borderPane, 600, 600);
-
-        return scene;
+        return new Scene(borderPane, 600, 600);
     }
 
     public void start() {
