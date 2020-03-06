@@ -55,7 +55,7 @@ public class Chess {
     boolean gameReady = true;
     boolean sendNetworkData = true;
 
-    public Chess(PlayerType opponentType){
+    public Chess(PlayerType opponentType) {
         this(opponentType, null);
     }
 
@@ -68,7 +68,7 @@ public class Chess {
             gameReady = false;
 
             try {
-                if(socket != null){
+                if (socket != null) {
                     this.socket = socket;
                 } else {
                     this.socket = new Socket("localhost", 8000);
@@ -120,35 +120,39 @@ public class Chess {
             status.setText("Waiting on player...");
         }
 
-        try {
-            if (player2.getType() == PlayerType.NETWORK) {
-                // Wait for the game to start
-                String str;
-                while (!(str = inputStream.readUTF()).startsWith("start"))
-                    ;
+        if (player2.getType() == PlayerType.NETWORK) {
+            // Wait for the player in a new thread
+            new Thread(() -> {
+                try {
+                    // Wait for the game to start
+                    String str;
+                    while (!(str = inputStream.readUTF()).startsWith("start"))
+                        ;
 
-                // Get the player id
-                int player = Integer.valueOf(str.substring(str.length() - 1));
+                    // Get the player id
+                    int player = Integer.valueOf(str.substring(str.length() - 1));
 
-                System.out.println("Player id: " + player);
+                    System.out.println("Player id: " + player);
 
-                // If we are player 2, swap the players
-                if (player == 2) {
-                    player1 = new Player(PlayerType.NETWORK, PLAYER1_CHAR);
-                    player2 = new Player(PlayerType.HUMAN, PLAYER2_CHAR);
+                    // If we are player 2, swap the players
+                    if (player == 2) {
+                        player1 = new Player(PlayerType.NETWORK, PLAYER1_CHAR);
+                        player2 = new Player(PlayerType.HUMAN, PLAYER2_CHAR);
 
-                    currentPlayer = player2;
+                        currentPlayer = player2;
 
-                    // Don't send data at the beginning
-                    sendNetworkData = false;
+                        // Don't send data at the beginning
+                        sendNetworkData = false;
+                    }
+
+                    Platform.runLater(this::setUpBoard);
+                    Platform.runLater(this::switchPlayerTurn);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-                setUpBoard();
-            }
-
+            }).start();
+        } else {
             switchPlayerTurn();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -234,34 +238,36 @@ public class Chess {
     }
 
     public void cpuTurn() {
-        CPU cpu = getCurrentCPU();
+        new Thread(()-> {
+            CPU cpu = getCurrentCPU();
 
-        Move move = cpu.getBestMove();
-        move.makeMove();
+            Move move = cpu.getBestMove();
+            move.makeMove();
 
-        // Always wait at least 1 second
-        long calcTime = System.currentTimeMillis() - lastUpdate;
-        if (calcTime < 1000) {
-            try {
-                Thread.sleep(1000 - calcTime);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            // Always wait at least 1 second
+            long calcTime = System.currentTimeMillis() - lastUpdate;
+            if (calcTime < 1000) {
+                try {
+                    Thread.sleep(1000 - calcTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
 
-        refreshBoard();
-        lastUpdate = System.currentTimeMillis();
+            Platform.runLater(this::refreshBoard);
+            lastUpdate = System.currentTimeMillis();
 
-        if (move.toCell.getToken().endsWith("k")) {
-            gameOver = true;
-        }
+            if (move.toCell.getToken().endsWith("k")) {
+                gameOver = true;
+            }
 
-        if (gameOver) {
-            status.setText("GAME OVER! Black wins");
-            currentPlayer = null;
-        } else {
-            Platform.runLater(this::switchPlayerTurn);
-        }
+            if (gameOver) {
+                status.setText("GAME OVER! Black wins");
+                currentPlayer = null;
+            } else {
+                Platform.runLater(this::switchPlayerTurn);
+            }
+        }).start();
     }
 
     private void networkTurn() {
@@ -271,21 +277,29 @@ public class Chess {
                 outputStream.writeUTF(objectMapper.writeValueAsString(board));
                 outputStream.flush();
             }
-
-            // Wait for the new board
-            String str;
-            while ((str = inputStream.readUTF()).equals(""))
-                ;
-
-            board = objectMapper.readValue(str, Cell[][].class);
-            refreshBoard();
-
-            // Always send data from now on
-            sendNetworkData = true;
-            Platform.runLater(this::switchPlayerTurn);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Wait on the other player in a new thread
+        new Thread(() -> {
+            try {
+                // Wait for the new board
+                String str;
+                while ((str = inputStream.readUTF()).equals(""))
+                    ;
+
+                board = objectMapper.readValue(str, Cell[][].class);
+
+                // Always send data from now on
+                sendNetworkData = true;
+
+                Platform.runLater(this::refreshBoard);
+                Platform.runLater(this::switchPlayerTurn);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }).start();
     }
 
     public void switchPlayerTurn() {
@@ -293,10 +307,10 @@ public class Chess {
 
         if (currentPlayer.getType() == PlayerType.CPU) {
             status.setText("CPU is thinking...");
-            Platform.runLater(this::cpuTurn);
+            cpuTurn();
         } else if (currentPlayer.getType() == PlayerType.NETWORK) {
             status.setText("Waiting on player...");
-            Platform.runLater(() -> networkTurn());
+            networkTurn();
         } else {
             if (player1.getType() == PlayerType.HUMAN && player2.getType() == PlayerType.HUMAN) {
                 if (currentPlayer == player1) {
