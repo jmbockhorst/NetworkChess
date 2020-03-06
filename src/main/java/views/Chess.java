@@ -13,12 +13,16 @@ import chess.CPU;
 import chess.Cell;
 import chess.Move;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import player.Player;
 import player.PlayerType;
@@ -83,7 +87,7 @@ public class Chess {
         }
     }
 
-    public Scene getScene() {
+    public Scene getScene(EventHandler<ActionEvent> exitHandler) {
         GridPane pane = new GridPane();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -107,10 +111,19 @@ public class Chess {
         Button resetButton = new Button("Play Again");
         resetButton.setOnMouseClicked(e -> resetGame());
 
+        Button exitButton = new Button("Exit");
+        exitButton.setOnAction(exitHandler);
+
+        StackPane bottomRow = new StackPane();
+
+        bottomRow.getChildren().add(exitButton);
+        bottomRow.getChildren().add(status);
+        StackPane.setAlignment(exitButton, Pos.CENTER_LEFT);
+        StackPane.setAlignment(status, Pos.CENTER);
+
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(pane);
-        borderPane.setBottom(status);
-        BorderPane.setAlignment(status, Pos.CENTER);
+        borderPane.setBottom(bottomRow);
 
         return new Scene(borderPane, 600, 600);
     }

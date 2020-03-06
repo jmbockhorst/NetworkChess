@@ -4,6 +4,8 @@ import chess.NetworkGameClient;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -28,9 +30,12 @@ public class NetworkMenu {
     ObjectMapper objectMapper;
     Stage primaryStage;
 
-    public NetworkMenu(Stage primaryStage) {
+    EventHandler<ActionEvent> exitHandler;
+
+    public NetworkMenu(Stage primaryStage, EventHandler<ActionEvent> exitHandler) {
         try {
             this.primaryStage = primaryStage;
+            this.exitHandler = exitHandler;
 
             socket = new Socket("localhost", 8000);
             inputStream = new DataInputStream(socket.getInputStream());
@@ -43,6 +48,9 @@ public class NetworkMenu {
 
     public Scene getScene() {
         BorderPane mainPane = new BorderPane();
+
+        Button backButton = new Button("Back");
+        backButton.setOnAction(exitHandler);
 
         // Refresh button to reload the games list
         Button refreshButton = new Button("Refresh");
@@ -62,7 +70,7 @@ public class NetworkMenu {
                 // Create the new game with the current connection
                 Chess chess = new Chess(PlayerType.NETWORK, socket);
                 System.out.println("Setup chess game");
-                primaryStage.setScene(chess.getScene());
+                primaryStage.setScene(chess.getScene(exitHandler));
 
                 Platform.runLater(() -> chess.start());
 
@@ -72,9 +80,13 @@ public class NetworkMenu {
             }
         });
 
-        mainPane.setTop(refreshButton);
+        HBox buttonGroup = new HBox();
+        buttonGroup.getChildren().add(hostGameButton);
+        buttonGroup.getChildren().add(refreshButton);
+
+        mainPane.setTop(backButton);
         mainPane.setCenter(getGamesList());
-        mainPane.setBottom(hostGameButton);
+        mainPane.setBottom(buttonGroup);
 
         return new Scene(mainPane, 600, 600);
     }
@@ -100,7 +112,7 @@ public class NetworkMenu {
 
                     // Create the new game with the current connection
                     Chess chess = new Chess(PlayerType.NETWORK, socket);
-                    primaryStage.setScene(chess.getScene());
+                    primaryStage.setScene(chess.getScene(exitHandler));
 
                     chess.start();
                 } catch (IOException ex) {
