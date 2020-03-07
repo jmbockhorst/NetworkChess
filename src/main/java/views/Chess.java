@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import chess.CPU;
 import chess.Cell;
 import chess.Move;
+import game.ICPU;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -21,7 +22,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import player.Player;
@@ -45,8 +45,8 @@ public class Chess {
     boolean gameOver = false;
     Label status = new Label();
 
-    CPU cpu1;
-    CPU cpu2;
+    ICPU cpu1;
+    ICPU cpu2;
 
     long lastUpdate = 0;
 
@@ -251,8 +251,8 @@ public class Chess {
     }
 
     public void cpuTurn() {
-        new Thread(()-> {
-            CPU cpu = getCurrentCPU();
+        new Thread(() -> {
+            ICPU cpu = getCurrentCPU();
 
             Move move = cpu.getBestMove();
             move.makeMove();
@@ -270,16 +270,7 @@ public class Chess {
             Platform.runLater(this::refreshBoard);
             lastUpdate = System.currentTimeMillis();
 
-            if (move.toCell.getToken().endsWith("k")) {
-                gameOver = true;
-            }
-
-            if (gameOver) {
-                status.setText("GAME OVER! Black wins");
-                currentPlayer = null;
-            } else {
-                Platform.runLater(this::switchPlayerTurn);
-            }
+            Platform.runLater(this::switchPlayerTurn);
         }).start();
     }
 
@@ -347,7 +338,7 @@ public class Chess {
         return currentPlayer == player1 ? player2 : player1;
     }
 
-    public CPU getCurrentCPU() {
+    public ICPU getCurrentCPU() {
         return currentPlayer == player1 ? cpu1 : cpu2;
     }
 }
@@ -361,7 +352,7 @@ class GetBestHumanMove extends Thread {
 
     @Override
     public void run() {
-        CPU cpu = chess.getCurrentCPU();
+        ICPU cpu = chess.getCurrentCPU();
 
         System.out.println("Your best move is: " + cpu.getBestMove());
     }

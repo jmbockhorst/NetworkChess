@@ -52,7 +52,7 @@ public class CellPane extends Pane {
     }
 
     private void handleMouseClick() {
-        if (chess.getCurrentPlayer().getType() == PlayerType.HUMAN) {
+        if (chess.getCurrentPlayer() != null && chess.getCurrentPlayer().getType() == PlayerType.HUMAN) {
             String playerChar = chess.getCurrentPlayer().getCharacter();
             String opponentChar = chess.getCurrentPlayerOpponent().getCharacter();
 

@@ -3,10 +3,12 @@ package chess;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import game.ICPU;
 import player.Player;
 
-public class CPU {
+public class CPU implements ICPU {
 
     private Cell[][] board;
     private Player cpuPlayer;
@@ -24,25 +26,28 @@ public class CPU {
         int beta = 10000;
 
         List<Move> maxMoveList = getMoves(board, cpuPlayer, opponentPlayer);
-
         Move best = maxMoveList.get(0);
+
+        System.out.println("CPU moves size: " + maxMoveList.size());
 
         List<Move> tiedMoves = new ArrayList<>();
 
-        for (int i = 0; i < maxMoveList.size(); i++) {
-            Move move = maxMoveList.get(i);
+        for (Move move : maxMoveList) {
             move.makeMove();
 
             int moveScore = alphaBeta(board, alpha, beta, depth - 1, false);
 
             move.undoMove();
 
+            System.out.println(move + ", Score: " + moveScore);
+
             if (moveScore > alpha) {
                 alpha = moveScore;
                 best = move;
 
                 tiedMoves.clear();
-            } else if (moveScore == alpha) {
+                tiedMoves.add(move);
+            } else if (moveScore == alpha && move.getValue() == tiedMoves.get(0).getValue()) {
                 tiedMoves.add(move);
             }
 
@@ -68,8 +73,7 @@ public class CPU {
 
             int bestMove = -9999;
 
-            for (int i = 0; i < maxMoveList.size(); i++) {
-                Move move = maxMoveList.get(i);
+            for (Move move : maxMoveList) {
                 move.makeMove();
 
                 bestMove = Math.max(bestMove, alphaBeta(cells, alpha, beta, depth - 1, false));
@@ -88,8 +92,7 @@ public class CPU {
 
             int bestMove = 9999;
 
-            for (int i = 0; i < minMoveList.size(); i++) {
-                Move move = minMoveList.get(i);
+            for (Move move : minMoveList) {
                 move.makeMove();
 
                 bestMove = Math.min(bestMove, alphaBeta(cells, alpha, beta, depth - 1, true));
