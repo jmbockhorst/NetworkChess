@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import chess.Board;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import chess.CPU;
@@ -44,6 +45,7 @@ public class Chess {
 
     boolean gameOver = false;
     Label status = new Label();
+    Label checkText = new Label();
 
     ICPU cpu1;
     ICPU cpu2;
@@ -51,13 +53,13 @@ public class Chess {
     long lastUpdate = 0;
 
     // Needed for network games
-    Socket socket;
-    DataInputStream inputStream;
-    DataOutputStream outputStream;
-    ObjectMapper objectMapper;
+    private Socket socket;
+    private DataInputStream inputStream;
+    private DataOutputStream outputStream;
+    private ObjectMapper objectMapper;
 
-    boolean gameReady = true;
-    boolean sendNetworkData = true;
+    private boolean gameReady = true;
+    private boolean sendNetworkData = true;
 
     public Chess(PlayerType opponentType) {
         this(opponentType, null);
@@ -107,6 +109,7 @@ public class Chess {
         cpu2 = new CPU(board, player2, player1);
 
         status.setFont(Font.font("Times New Roman", 24));
+        checkText.setFont(Font.font("Times New Roman", 24));
 
         Button resetButton = new Button("Play Again");
         resetButton.setOnMouseClicked(e -> resetGame());
@@ -118,8 +121,10 @@ public class Chess {
 
         bottomRow.getChildren().add(exitButton);
         bottomRow.getChildren().add(status);
+        bottomRow.getChildren().add(checkText);
         StackPane.setAlignment(exitButton, Pos.CENTER_LEFT);
         StackPane.setAlignment(status, Pos.CENTER);
+        StackPane.setAlignment(checkText, Pos.CENTER_RIGHT);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(pane);
@@ -167,24 +172,6 @@ public class Chess {
         } else {
             switchPlayerTurn();
         }
-    }
-
-    public boolean checkWin(char token) {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (token == 'b') {
-                    if (board[i][j].getToken() == "wk") {
-                        return false;
-                    }
-                } else if (token == 'w') {
-                    if (board[i][j].getToken() == "bk") {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        return true;
     }
 
     private void resetGame() {
@@ -307,6 +294,18 @@ public class Chess {
     }
 
     public void switchPlayerTurn() {
+        // Check for win or check
+        if (Board.isChecked(board, currentPlayer, getCurrentPlayerOpponent())) {
+            checkText.setText("Check");
+        } else {
+            checkText.setText("");
+        }
+
+        if (Board.checkWin(board, currentPlayer)) {
+            status.setText("Game over - " + (currentPlayer.getCharacter().equals("b") ? "Black" : "White") + " wins");
+            return;
+        }
+
         currentPlayer = currentPlayer == player1 ? player2 : player1;
 
         if (currentPlayer.getType() == PlayerType.CPU) {
@@ -325,8 +324,6 @@ public class Chess {
             } else {
                 status.setText("Your turn");
             }
-
-            // new GetBestHumanMove(this).start();
         }
     }
 

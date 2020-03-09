@@ -57,20 +57,6 @@ public class CellPane extends Pane {
             String opponentChar = chess.getCurrentPlayerOpponent().getCharacter();
 
             if (chess.movingCell != null && chess.activeMoves.stream().anyMatch(move -> move.toCell == cell)) {
-                boolean gameOver = false;
-
-                if (cell.getToken().startsWith(opponentChar)) {
-                    if (cell.getToken().endsWith("k")) {
-                        if (playerChar.equals("w")) {
-                            chess.status.setText("GAME OVER! White wins");
-                        } else if (playerChar.equals("b")) {
-                            chess.status.setText("GAME OVER! Black wins");
-                        }
-
-                        gameOver = true;
-                    }
-                }
-
                 Move move = chess.activeMoves.stream().filter(m -> m.toCell == cell).findFirst().get();
 
                 // chess.Move chess.Cell
@@ -80,15 +66,13 @@ public class CellPane extends Pane {
                 chess.refreshBoard();
                 chess.lastUpdate = System.currentTimeMillis();
 
-                if (!gameOver) {
-                    // Switch turn
-                    chess.switchPlayerTurn();
-                }
+                // Switch turn
+                chess.switchPlayerTurn();
 
             } else if (cell.getToken().contains(playerChar)) {
                 chess.clearMoves();
                 chess.movingCell = cell;
-                chess.activeMoves.addAll(cell.findMoves(chess.board, playerChar, opponentChar));
+                chess.activeMoves.addAll(cell.findMoves(chess.board, chess.getCurrentPlayer(), chess.getCurrentPlayerOpponent(), true));
                 chess.refreshBoard();
             } else {
                 chess.clearMoves();
