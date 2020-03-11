@@ -41,7 +41,7 @@ public class Cell implements Comparable<Cell> {
         List<Move> moves = new ArrayList<>();
 
         String playerChar = player.getCharacter();
-        String opponentChar = player.getCharacter();
+        String opponentChar = opponent.getCharacter();
 
         // Pawn moves
         if (token.endsWith("p")) {
