@@ -6,11 +6,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class MainMenu {
 
-    public static Scene getScene(EventHandler<ActionEvent> singlePlayerHandler, EventHandler<ActionEvent> multiPlayerHandler,
-            EventHandler<ActionEvent> networkGameHandler) {
+    public static void render(Stage stage, EventHandler<ActionEvent> singlePlayerHandler,
+            EventHandler<ActionEvent> multiPlayerHandler, EventHandler<ActionEvent> networkGameHandler) {
         BorderPane mainPane = new BorderPane();
 
         VBox gameMenu = new VBox();
@@ -30,7 +31,7 @@ public class MainMenu {
 
         mainPane.setCenter(gameMenu);
 
-        return new Scene(mainPane, 600, 600);
+        stage.setScene(new Scene(mainPane, 600, 600));
     }
 
 }

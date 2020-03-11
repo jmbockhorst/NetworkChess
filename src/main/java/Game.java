@@ -14,7 +14,7 @@ public class Game extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Scene menuScene = MainMenu.getScene(e -> {
+        MainMenu.render(primaryStage, e -> {
             Scene currentScene = primaryStage.getScene();
             Chess chess = new Chess(PlayerType.CPU);
             chess.render(primaryStage, ev -> primaryStage.setScene(currentScene));
@@ -26,11 +26,9 @@ public class Game extends Application {
             chess.start();
         }, e -> {
             Scene currentScene = primaryStage.getScene();
-            NetworkMenu networkMenu = new NetworkMenu();
-            networkMenu.render(primaryStage, ev -> primaryStage.setScene(currentScene));
+            new NetworkMenu().render(primaryStage, ev -> primaryStage.setScene(currentScene));
         });
 
-        primaryStage.setScene(menuScene);
         primaryStage.setTitle("Chess");
         primaryStage.show();
     }
