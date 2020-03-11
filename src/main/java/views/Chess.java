@@ -28,6 +28,10 @@ import javafx.scene.text.Font;
 import player.Player;
 import player.PlayerType;
 
+interface CellClickedHandler {
+    void handleCellClicked(Cell cell);
+}
+
 public class Chess {
     public final static String PLAYER1_CHAR = "w";
     public final static String PLAYER2_CHAR = "b";
@@ -51,6 +55,8 @@ public class Chess {
     ICPU cpu2;
 
     long lastUpdate = 0;
+
+    private CellClickedHandler cellClickedHandler;
 
     // Needed for network games
     private Socket socket;
@@ -89,6 +95,8 @@ public class Chess {
                 e.printStackTrace();
             }
         }
+
+        cellClickedHandler = cell -> handleCellClick(cell);
     }
 
     public Scene getScene(EventHandler<ActionEvent> exitHandler) {
@@ -96,7 +104,7 @@ public class Chess {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 board[i][j] = new Cell(i, j);
-                pane.add(boardDisplay[i][j] = new CellPane(this, board[i][j]), j, i);
+                pane.add(boardDisplay[i][j] = new CellPane(board[i][j], cellClickedHandler), j, i);
 
                 if (j % 2 == 0 ^ i % 2 == 0) {
                     boardDisplay[i][j].setStyle("-fx-background-color: #e29b3d");
@@ -220,7 +228,12 @@ public class Chess {
                 // Swap the row and col if it should be
                 int row = player1.getType() == PlayerType.NETWORK ? 7 - i : i;
                 int col = player1.getType() == PlayerType.NETWORK ? 7 - j : j;
-                boardDisplay[i][j].refreshCell(board[row][col]);
+
+                // Check if this is an active move
+                boolean moving = movingCell != null
+                        && activeMoves.stream().anyMatch(move -> move.toCell == board[row][col]);
+
+                boardDisplay[i][j].refreshCell(board[row][col], moving);
             }
         }
     }
@@ -312,7 +325,7 @@ public class Chess {
 
         // Check for checkmate
         List<Move> moves = Board.getMoves(board, currentPlayer, getCurrentPlayerOpponent(), true);
-        if(moves.size() == 0){
+        if (moves.size() == 0) {
             checkText.setText("Checkmate");
             checkMate = true;
         }
@@ -332,6 +345,33 @@ public class Chess {
                 }
             } else {
                 status.setText("Your turn");
+            }
+        }
+    }
+
+    public void handleCellClick(Cell cell) {
+        if (getCurrentPlayer() != null && getCurrentPlayer().getType() == PlayerType.HUMAN) {
+            String playerChar = getCurrentPlayer().getCharacter();
+
+            if (movingCell != null && activeMoves.stream().anyMatch(move -> move.toCell == cell)) {
+                Move move = activeMoves.stream().filter(m -> m.toCell == cell).findFirst().get();
+
+                move.makeMove();
+                movingCell = null;
+                clearMoves();
+                refreshBoard();
+                lastUpdate = System.currentTimeMillis();
+
+                // Switch turn
+                switchPlayerTurn();
+            } else if (cell.getToken().contains(playerChar)) {
+                clearMoves();
+                movingCell = cell;
+                activeMoves.addAll(cell.findMoves(board, getCurrentPlayer(), getCurrentPlayerOpponent(), !checkMate));
+                refreshBoard();
+            } else {
+                clearMoves();
+                movingCell = null;
             }
         }
     }
