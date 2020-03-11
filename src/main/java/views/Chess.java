@@ -25,6 +25,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import player.Player;
 import player.PlayerType;
 
@@ -104,7 +105,7 @@ public class Chess {
         cellClickedHandler = cell -> handleCellClick(cell);
     }
 
-    public Scene getScene(EventHandler<ActionEvent> exitHandler) {
+    public void render(Stage stage, EventHandler<ActionEvent> exitHandler) {
         GridPane pane = new GridPane();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -137,7 +138,7 @@ public class Chess {
         borderPane.setCenter(pane);
         borderPane.setBottom(bottomRow);
 
-        return new Scene(borderPane, 600, 600);
+        stage.setScene(new Scene(borderPane, 600, 600));
     }
 
     public void start() {

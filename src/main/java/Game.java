@@ -17,17 +17,17 @@ public class Game extends Application {
         Scene menuScene = MainMenu.getScene(e -> {
             Scene currentScene = primaryStage.getScene();
             Chess chess = new Chess(PlayerType.CPU);
-            primaryStage.setScene(chess.getScene(ev -> primaryStage.setScene(currentScene)));
+            chess.render(primaryStage, ev -> primaryStage.setScene(currentScene));
             chess.start();
         }, e -> {
             Scene currentScene = primaryStage.getScene();
             Chess chess = new Chess(PlayerType.HUMAN);
-            primaryStage.setScene(chess.getScene(ev -> primaryStage.setScene(currentScene)));
+            chess.render(primaryStage, ev -> primaryStage.setScene(currentScene));
             chess.start();
         }, e -> {
             Scene currentScene = primaryStage.getScene();
-            NetworkMenu networkMenu = new NetworkMenu(primaryStage, ev -> primaryStage.setScene(currentScene));
-            primaryStage.setScene(networkMenu.getScene());
+            NetworkMenu networkMenu = new NetworkMenu();
+            networkMenu.render(primaryStage, ev -> primaryStage.setScene(currentScene));
         });
 
         primaryStage.setScene(menuScene);
