@@ -361,7 +361,6 @@ public class Cell implements Comparable<Cell> {
                 for (Move oppMove : opponentMoves) {
                     if (oppMove.toCell.getToken().endsWith("k")) {
                         foundWinningMove = true;
-                        System.out.println(move + " should be removed because the opponent will win with " + oppMove);
                         break;
                     }
                 }

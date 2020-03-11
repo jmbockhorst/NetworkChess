@@ -68,11 +68,10 @@ public class CellPane extends Pane {
 
                 // Switch turn
                 chess.switchPlayerTurn();
-
             } else if (cell.getToken().contains(playerChar)) {
                 chess.clearMoves();
                 chess.movingCell = cell;
-                chess.activeMoves.addAll(cell.findMoves(chess.board, chess.getCurrentPlayer(), chess.getCurrentPlayerOpponent(), true));
+                chess.activeMoves.addAll(cell.findMoves(chess.board, chess.getCurrentPlayer(), chess.getCurrentPlayerOpponent(), !chess.checkMate));
                 chess.refreshBoard();
             } else {
                 chess.clearMoves();

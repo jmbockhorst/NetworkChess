@@ -61,6 +61,8 @@ public class Chess {
     private boolean gameReady = true;
     private boolean sendNetworkData = true;
 
+    boolean checkMate = false;
+
     public Chess(PlayerType opponentType) {
         this(opponentType, null);
     }
@@ -307,6 +309,13 @@ public class Chess {
         }
 
         currentPlayer = currentPlayer == player1 ? player2 : player1;
+
+        // Check for checkmate
+        List<Move> moves = Board.getMoves(board, currentPlayer, getCurrentPlayerOpponent(), true);
+        if(moves.size() == 0){
+            checkText.setText("Checkmate");
+            checkMate = true;
+        }
 
         if (currentPlayer.getType() == PlayerType.CPU) {
             status.setText("CPU is thinking...");
