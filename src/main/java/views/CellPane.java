@@ -8,7 +8,7 @@ import javafx.scene.layout.Pane;
 /**
  */
 public class CellPane extends Pane {
-    private String imageName = "";
+    private String imageName;
     private Cell cell;
 
     public CellPane(Cell cell, CellClickedHandler cellClickedHandler) {

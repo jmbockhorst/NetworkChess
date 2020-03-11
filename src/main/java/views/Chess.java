@@ -36,25 +36,27 @@ public class Chess {
     public final static String PLAYER1_CHAR = "w";
     public final static String PLAYER2_CHAR = "b";
 
-    private Player player1 = new Player(PlayerType.HUMAN, PLAYER1_CHAR);
+    // Game logic
+    private Player player1;
     private Player player2;
 
     private Player currentPlayer;
 
-    CellPane[][] boardDisplay = new CellPane[8][8];
-    Cell[][] board = new Cell[8][8];
-    List<Move> activeMoves = new ArrayList<>();
+    private Cell[][] board = new Cell[8][8];
+    private List<Move> activeMoves = new ArrayList<>();
+    private Cell movingCell = null;
 
-    Cell movingCell = null;
+    private ICPU cpu1;
+    private ICPU cpu2;
 
-    boolean gameOver = false;
-    Label status = new Label();
-    Label checkText = new Label();
+    private long lastUpdate = 0;
 
-    ICPU cpu1;
-    ICPU cpu2;
+    boolean checkMate = false;
 
-    long lastUpdate = 0;
+    // UI
+    private CellPane[][] boardDisplay = new CellPane[8][8];
+    private Label status = new Label();
+    private Label checkText = new Label();
 
     private CellClickedHandler cellClickedHandler;
 
@@ -67,15 +69,18 @@ public class Chess {
     private boolean gameReady = true;
     private boolean sendNetworkData = true;
 
-    boolean checkMate = false;
-
+    // Constructors
     public Chess(PlayerType opponentType) {
         this(opponentType, null);
     }
 
     public Chess(PlayerType opponentType, Socket socket) {
+        player1 = new Player(PlayerType.HUMAN, PLAYER1_CHAR);
         player2 = new Player(opponentType, PLAYER2_CHAR);
         currentPlayer = player2;
+
+        cpu1 = new CPU(board, player1, player2);
+        cpu2 = new CPU(board, player2, player1);
 
         // Set up the network if needed
         if (opponentType == PlayerType.NETWORK) {
@@ -105,18 +110,10 @@ public class Chess {
             for (int j = 0; j < 8; j++) {
                 board[i][j] = new Cell(i, j);
                 pane.add(boardDisplay[i][j] = new CellPane(board[i][j], cellClickedHandler), j, i);
-
-                if (j % 2 == 0 ^ i % 2 == 0) {
-                    boardDisplay[i][j].setStyle("-fx-background-color: #e29b3d");
-                } else {
-                    boardDisplay[i][j].setStyle("-fx-background-color: #f7ca8f");
-                }
             }
         }
 
         setUpBoard();
-        cpu1 = new CPU(board, player1, player2);
-        cpu2 = new CPU(board, player2, player1);
 
         status.setFont(Font.font("Times New Roman", 24));
         checkText.setFont(Font.font("Times New Roman", 24));
@@ -219,6 +216,7 @@ public class Chess {
             board[6][i].setToken("wp");
         }
 
+        drawBoardPattern();
         refreshBoard();
     }
 
@@ -240,7 +238,10 @@ public class Chess {
 
     public void clearMoves() {
         activeMoves.clear();
+        drawBoardPattern();
+    }
 
+    private void drawBoardPattern() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (j % 2 == 0 ^ i % 2 == 0) {
