@@ -1,6 +1,6 @@
 package views;
 
-import chess.NetworkGameClient;
+import game.network.NetworkGameClient;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
@@ -13,7 +13,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import player.PlayerType;
+import game.player.PlayerType;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

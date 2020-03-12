@@ -1,4 +1,4 @@
-package chess;
+package game.network;
 
 import java.net.Socket;
 

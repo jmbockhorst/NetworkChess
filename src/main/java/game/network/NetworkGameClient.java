@@ -1,4 +1,4 @@
-package chess;
+package game.network;
 
 public class NetworkGameClient {
     private int gameId;

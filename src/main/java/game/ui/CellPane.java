@@ -1,6 +1,6 @@
-package views;
+package game.ui;
 
-import chess.Cell;
+import game.Cell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;

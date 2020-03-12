@@ -1,7 +1,5 @@
 package game;
 
-import chess.Cell;
-
 public class Move {
     public Cell fromCell;
     public Cell toCell;

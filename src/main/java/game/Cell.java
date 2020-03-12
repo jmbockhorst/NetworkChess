@@ -1,11 +1,4 @@
-package chess;
-
-import game.Move;
-import player.Player;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+package game;
 
 public class Cell implements Comparable<Cell> {
     private String token;

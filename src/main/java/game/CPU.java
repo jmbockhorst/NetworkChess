@@ -1,15 +1,11 @@
-package chess;
+package game;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import game.GetMovesFunction;
-import game.ICPU;
-import game.Move;
-import game.PieceValueFunction;
-import player.Player;
+import game.player.Player;
 
-public class CPU implements ICPU {
+public class CPU {
 
     private Cell[][] board;
     private Player cpuPlayer;

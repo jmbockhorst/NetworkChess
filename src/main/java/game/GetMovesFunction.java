@@ -2,8 +2,7 @@ package game;
 
 import java.util.List;
 
-import chess.Cell;
-import player.Player;
+import game.player.Player;
 
 /**
  * GetMovesFunction

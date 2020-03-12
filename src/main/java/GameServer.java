@@ -1,5 +1,7 @@
-import chess.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import game.Cell;
+import game.network.NetworkGame;
+import game.network.NetworkGameClient;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -158,35 +160,35 @@ class TwoPlayerConnectionHandler implements Runnable {
     @Override
     public void run() {
         try {
-            // Wait for the board from player 1
+            // Wait for the board from game.player 1
             String str;
             while ((str = inputStream1.readUTF()).equals(""))
                 ;
 
-            System.out.println("Received data from player 1");
+            System.out.println("Received data from game.player 1");
 
             board = objectMapper.readValue(str, Cell[][].class);
 
-            // Send the board to player 2
+            // Send the board to game.player 2
             outputStream2.writeUTF(objectMapper.writeValueAsString(board));
             outputStream2.flush();
 
-            System.out.println("Sent data to player 2");
+            System.out.println("Sent data to game.player 2");
 
-            // Wait for the board from player 2
+            // Wait for the board from game.player 2
             String str2;
             while ((str2 = inputStream2.readUTF()).equals(""))
                 ;
 
-            System.out.println("Received data from player 2");
+            System.out.println("Received data from game.player 2");
 
             board = objectMapper.readValue(str2, Cell[][].class);
 
-            // Send the board to player 1
+            // Send the board to game.player 1
             outputStream1.writeUTF(objectMapper.writeValueAsString(board));
             outputStream1.flush();
 
-            System.out.println("Sent data to player 1");
+            System.out.println("Sent data to game.player 1");
 
             run();
         } catch (IOException e) {

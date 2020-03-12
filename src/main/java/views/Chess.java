@@ -5,15 +5,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import chess.Cell;
-import game.ICPU;
+import game.BoardGame;
+import game.CPU;
+import game.Cell;
 import game.Move;
-import player.Player;
-import player.PlayerType;
-
-interface CellClickedHandler {
-    void handleCellClicked(Cell cell);
-}
+import game.ui.CellPane;
+import game.player.Player;
+import game.player.PlayerType;
 
 public class Chess extends BoardGame {
     public final static String PLAYER1_CHAR = "w";
@@ -402,7 +400,7 @@ public class Chess extends BoardGame {
             for (Iterator<Move> iterator = moves.iterator(); iterator.hasNext();) {
                 Move move = iterator.next();
 
-                // Check if making this move causes the other player to win
+                // Check if making this move causes the other game.player to win
                 move.makeMove();
 
                 boolean foundWinningMove = false;
@@ -493,7 +491,7 @@ class GetBestHumanMove extends Thread {
 
     @Override
     public void run() {
-        ICPU cpu = chess.getCurrentCPU();
+        CPU cpu = chess.getCurrentCPU();
 
         System.out.println("Your best move is: " + cpu.getBestMove());
     }

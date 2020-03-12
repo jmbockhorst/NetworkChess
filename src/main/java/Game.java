@@ -1,7 +1,7 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import player.PlayerType;
+import game.player.PlayerType;
 import views.Chess;
 import views.MainMenu;
 import views.NetworkMenu;

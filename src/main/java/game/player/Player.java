@@ -1,4 +1,4 @@
-package player;
+package game.player;
 
 public class Player {
     private PlayerType type;

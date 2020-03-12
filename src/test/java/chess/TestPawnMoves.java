@@ -2,10 +2,11 @@ package chess;
 
 import static org.junit.Assert.*;
 
+import game.Cell;
 import game.Move;
 import org.junit.Test;
-import player.Player;
-import player.PlayerType;
+import game.player.Player;
+import game.player.PlayerType;
 import views.Chess;
 
 import java.util.Arrays;

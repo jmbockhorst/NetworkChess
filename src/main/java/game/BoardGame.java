@@ -1,10 +1,11 @@
-package views;
+package game;
 
-import chess.CPU;
-import chess.Cell;
+import game.CPU;
+import game.Cell;
 import game.Move;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import game.ICPU;
+import game.ui.CellClickedHandler;
+import game.ui.CellPane;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,8 +18,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import player.Player;
-import player.PlayerType;
+import game.player.Player;
+import game.player.PlayerType;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -43,10 +44,10 @@ public abstract class BoardGame {
     protected List<Move> activeMoves = new ArrayList<>();
     protected Cell movingCell = null;
 
-    protected ICPU cpu1;
-    protected ICPU cpu2;
+    private CPU cpu1;
+    private CPU cpu2;
 
-    protected long lastUpdate = 0;
+    private long lastUpdate = 0;
 
     // UI
     protected CellPane[][] boardDisplay;
@@ -186,11 +187,11 @@ public abstract class BoardGame {
 
     public void start() {
         if (!gameReady) {
-            status.setText("Waiting on player...");
+            status.setText("Waiting on game.player...");
         }
 
         if (player2.getType() == PlayerType.NETWORK) {
-            // Wait for the player in a new thread
+            // Wait for the game.player in a new thread
             new Thread(() -> {
                 try {
                     // Wait for the game to start
@@ -198,12 +199,12 @@ public abstract class BoardGame {
                     while (!(str = inputStream.readUTF()).startsWith("start"))
                         ;
 
-                    // Get the player id
+                    // Get the game.player id
                     int player = Integer.valueOf(str.substring(str.length() - 1));
 
                     System.out.println("Player id: " + player);
 
-                    // If we are player 2, swap the players
+                    // If we are game.player 2, swap the players
                     if (player == 2) {
                         player1 = new Player(PlayerType.NETWORK, player1.getCharacter());
                         player2 = new Player(PlayerType.HUMAN, player2.getCharacter());
@@ -227,7 +228,7 @@ public abstract class BoardGame {
 
     private void cpuTurn() {
         new Thread(() -> {
-            ICPU cpu = getCurrentCPU();
+            CPU cpu = getCurrentCPU();
 
             Move move = cpu.getBestMove();
             move.makeMove();
@@ -260,7 +261,7 @@ public abstract class BoardGame {
             e.printStackTrace();
         }
 
-        // Wait on the other player in a new thread
+        // Wait on the other game.player in a new thread
         new Thread(() -> {
             try {
                 // Wait for the new board
@@ -295,7 +296,7 @@ public abstract class BoardGame {
             status.setText("CPU is thinking...");
             cpuTurn();
         } else if (currentPlayer.getType() == PlayerType.NETWORK) {
-            status.setText("Waiting on player...");
+            status.setText("Waiting on game.player...");
             networkTurn();
         } else {
             if (player1.getType() == PlayerType.HUMAN && player2.getType() == PlayerType.HUMAN) {
@@ -370,7 +371,7 @@ public abstract class BoardGame {
         return currentPlayer == player1 ? player2 : player1;
     }
 
-    public ICPU getCurrentCPU() {
+    public CPU getCurrentCPU() {
         return currentPlayer == player1 ? cpu1 : cpu2;
     }
 
