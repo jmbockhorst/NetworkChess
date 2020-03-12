@@ -2,9 +2,11 @@ package chess;
 
 import static org.junit.Assert.*;
 
+import game.Move;
 import org.junit.Test;
 import player.Player;
 import player.PlayerType;
+import views.Chess;
 
 import java.util.Arrays;
 import java.util.List;
@@ -118,7 +120,9 @@ public class TestPawnMoves {
     }
 
     private void assertMoves(Cell[][] board, Cell cell, Cell[] cells, Player player1, Player player2) {
-        List<Move> moves = board[cell.getI()][cell.getJ()].findMoves(board, player1, player2, true);
+        Chess chess = new Chess(PlayerType.CPU);
+        chess.setBoard(board);
+        List<Move> moves = chess.findMoves(board[cell.getI()][cell.getJ()], player1, player2, true);
 
         assertEquals(cells.length, moves.size());
 

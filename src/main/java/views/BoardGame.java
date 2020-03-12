@@ -1,8 +1,8 @@
 package views;
 
-import chess.Board;
+import chess.CPU;
 import chess.Cell;
-import chess.Move;
+import game.Move;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import game.ICPU;
 import javafx.application.Platform;
@@ -25,6 +25,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -47,12 +48,10 @@ public abstract class BoardGame {
 
     protected long lastUpdate = 0;
 
-    protected boolean checkMate = false;
-
     // UI
     protected CellPane[][] boardDisplay;
     private Label status = new Label();
-    private Label checkText = new Label();
+    protected Label messageText = new Label();
 
     private CellClickedHandler cellClickedHandler;
 
@@ -73,6 +72,9 @@ public abstract class BoardGame {
         player1 = new Player(PlayerType.HUMAN, player1Char);
         player2 = new Player(opponentType, player2Char);
         currentPlayer = player2;
+
+        cpu1 = new CPU(board, player1, player2, this::getPieceValue, this::getMoves);
+        cpu2 = new CPU(board, player2, player1, this::getPieceValue, this::getMoves);
 
         // Set up the network if needed
         if (opponentType == PlayerType.NETWORK) {
@@ -100,6 +102,19 @@ public abstract class BoardGame {
 
     public abstract void setupBoardTokens();
 
+    public abstract List<Move> findMoves(Cell cell, Player player, Player opponent, boolean noLosingMoves);
+
+    public abstract boolean checkWin(Player player);
+
+    public abstract int getPieceValue(String token, String opponentChar);
+
+    public void handleTurnBegins() {
+    }
+
+    public boolean noLosingMoves() {
+        return false;
+    }
+
     public void render(Stage stage, EventHandler<ActionEvent> exitHandler) {
         GridPane pane = new GridPane();
         for (int i = 0; i < board.length; i++) {
@@ -112,7 +127,7 @@ public abstract class BoardGame {
         setUpBoard();
 
         status.setFont(Font.font("Times New Roman", 24));
-        checkText.setFont(Font.font("Times New Roman", 24));
+        messageText.setFont(Font.font("Times New Roman", 24));
 
         Button resetButton = new Button("Play Again");
         resetButton.setOnMouseClicked(e -> resetGame());
@@ -124,10 +139,10 @@ public abstract class BoardGame {
 
         bottomRow.getChildren().add(exitButton);
         bottomRow.getChildren().add(status);
-        bottomRow.getChildren().add(checkText);
+        bottomRow.getChildren().add(messageText);
         StackPane.setAlignment(exitButton, Pos.CENTER_LEFT);
         StackPane.setAlignment(status, Pos.CENTER);
-        StackPane.setAlignment(checkText, Pos.CENTER_RIGHT);
+        StackPane.setAlignment(messageText, Pos.CENTER_RIGHT);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(pane);
@@ -267,26 +282,14 @@ public abstract class BoardGame {
     }
 
     public void switchPlayerTurn() {
-        // Check for win or check
-        if (Board.isChecked(board, currentPlayer, getCurrentPlayerOpponent())) {
-            checkText.setText("Check");
-        } else {
-            checkText.setText("");
-        }
-
-        if (Board.checkWin(board, currentPlayer)) {
+        if (checkWin(currentPlayer)) {
             status.setText("Game over - " + (currentPlayer.getCharacter().equals("b") ? "Black" : "White") + " wins");
             return;
         }
 
         currentPlayer = currentPlayer == player1 ? player2 : player1;
 
-        // Check for checkmate
-        List<Move> moves = Board.getMoves(board, currentPlayer, getCurrentPlayerOpponent(), true);
-        if (moves.size() == 0) {
-            checkText.setText("Checkmate");
-            checkMate = true;
-        }
+        handleTurnBegins();
 
         if (currentPlayer.getType() == PlayerType.CPU) {
             status.setText("CPU is thinking...");
@@ -330,13 +333,33 @@ public abstract class BoardGame {
             } else if (cell.getToken().contains(playerChar)) {
                 clearMoves();
                 movingCell = cell;
-                activeMoves.addAll(cell.findMoves(board, getCurrentPlayer(), getCurrentPlayerOpponent(), !checkMate));
+                activeMoves.addAll(findMoves(cell, getCurrentPlayer(), getCurrentPlayerOpponent(), noLosingMoves()));
                 renderBoard();
             } else {
                 clearMoves();
                 movingCell = null;
             }
         }
+    }
+
+    public List<Move> getMoves(Cell[][] board, Player player, Player opponent) {
+        return getMoves(board, player, opponent, false);
+    }
+
+    public List<Move> getMoves(Cell[][] board, Player player, Player opponent, boolean noLosingMoves) {
+        List<Move> moveList = new ArrayList<>();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][j].getToken().startsWith(player.getCharacter())) {
+                    moveList.addAll(findMoves(board[i][j], player, opponent, noLosingMoves));
+                }
+            }
+        }
+
+        moveList.sort(Comparator.comparing(Move::getValue).reversed());
+
+        return moveList;
     }
 
     public Player getCurrentPlayer() {
@@ -349,5 +372,10 @@ public abstract class BoardGame {
 
     public ICPU getCurrentCPU() {
         return currentPlayer == player1 ? cpu1 : cpu2;
+    }
+
+    // Test helper function
+    public void setBoard(Cell[][] board){
+        this.board = board;
     }
 }

@@ -1,10 +1,6 @@
 import chess.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import player.Player;
-import player.PlayerType;
-import views.Chess;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -78,7 +74,9 @@ class NetworkGameHandler implements Runnable {
                     System.out.println("Server - list games: " + availableGames.size());
 
                     // Create the list of games to send to the client
-                    List<NetworkGameClient> clientGames = availableGames.stream().map(game -> new NetworkGameClient(game.getGameId(), game.getName())).collect(Collectors.toList());
+                    List<NetworkGameClient> clientGames = availableGames.stream()
+                            .map(game -> new NetworkGameClient(game.getGameId(), game.getName()))
+                            .collect(Collectors.toList());
 
                     outputStream.writeUTF(objectMapper.writeValueAsString(clientGames));
                     outputStream.flush();
@@ -199,73 +197,6 @@ class TwoPlayerConnectionHandler implements Runnable {
                 socket2.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
-            }
-        }
-    }
-}
-
-class ConnectionHandler implements Runnable {
-    Socket socket;
-    DataInputStream inputStream;
-    DataOutputStream outputStream;
-    ObjectMapper objectMapper;
-    Cell[][] board;
-
-    public ConnectionHandler(Socket socket) {
-        this.socket = socket;
-
-        try {
-            inputStream = new DataInputStream(socket.getInputStream());
-            outputStream = new DataOutputStream(socket.getOutputStream());
-            objectMapper = new ObjectMapper();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void run() {
-        try {
-            // Wait for the board
-            String str;
-            while ((str = inputStream.readUTF()).equals(""))
-                ;
-
-            board = objectMapper.readValue(str, Cell[][].class);
-
-            // Run the CPU and send the new board
-            runCPU();
-            outputStream.writeUTF(objectMapper.writeValueAsString(board));
-            outputStream.flush();
-
-            run();
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            try {
-                socket.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-    }
-
-    private void runCPU() {
-        CPU cpu = new CPU(board, new Player(PlayerType.CPU, Chess.PLAYER2_CHAR),
-                new Player(PlayerType.HUMAN, Chess.PLAYER1_CHAR));
-
-        long startTime = System.currentTimeMillis();
-        Move move = cpu.getBestMove();
-        move.makeMove();
-
-        // Always wait at least 1 second
-        long calcTime = System.currentTimeMillis() - startTime;
-        if (calcTime < 1000) {
-            try {
-                Thread.sleep(1000 - calcTime);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }

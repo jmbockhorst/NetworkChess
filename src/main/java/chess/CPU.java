@@ -3,7 +3,10 @@ package chess;
 import java.util.ArrayList;
 import java.util.List;
 
+import game.GetMovesFunction;
 import game.ICPU;
+import game.Move;
+import game.PieceValueFunction;
 import player.Player;
 
 public class CPU implements ICPU {
@@ -11,11 +14,16 @@ public class CPU implements ICPU {
     private Cell[][] board;
     private Player cpuPlayer;
     private Player opponentPlayer;
+    private PieceValueFunction pieceValueFunction;
+    private GetMovesFunction getMovesFunction;
 
-    public CPU(Cell[][] board, Player cpuPlayer, Player opponentPlayer) {
+    public CPU(Cell[][] board, Player cpuPlayer, Player opponentPlayer, PieceValueFunction piece,
+            GetMovesFunction getMovesFunction) {
         this.board = board;
         this.cpuPlayer = cpuPlayer;
         this.opponentPlayer = opponentPlayer;
+        this.pieceValueFunction = piece;
+        this.getMovesFunction = getMovesFunction;
     }
 
     public Move getBestMove() {
@@ -23,7 +31,7 @@ public class CPU implements ICPU {
         int alpha = -10000;
         int beta = 10000;
 
-        List<Move> maxMoveList = Board.getMoves(board, cpuPlayer, opponentPlayer);
+        List<Move> maxMoveList = getMovesFunction.call(board, cpuPlayer, opponentPlayer);
         Move best = maxMoveList.get(0);
 
         List<Move> tiedMoves = new ArrayList<>();
@@ -57,20 +65,20 @@ public class CPU implements ICPU {
         return best;
     }
 
-    private int alphaBeta(Cell[][] cells, int alpha, int beta, int depth, boolean isMax) {
+    private int alphaBeta(Cell[][] board, int alpha, int beta, int depth, boolean isMax) {
         if (depth == 0) {
-            return -evaluateBoard(cells);
+            return -evaluateBoard(board);
         }
 
         if (isMax) {
-            List<Move> maxMoveList = Board.getMoves(cells, cpuPlayer, opponentPlayer);
+            List<Move> maxMoveList = getMovesFunction.call(board, cpuPlayer, opponentPlayer);
 
             int bestMove = -9999;
 
             for (Move move : maxMoveList) {
                 move.makeMove();
 
-                bestMove = Math.max(bestMove, alphaBeta(cells, alpha, beta, depth - 1, false));
+                bestMove = Math.max(bestMove, alphaBeta(board, alpha, beta, depth - 1, false));
 
                 move.undoMove();
 
@@ -82,14 +90,14 @@ public class CPU implements ICPU {
 
             return bestMove;
         } else {
-            List<Move> minMoveList = Board.getMoves(cells, opponentPlayer, cpuPlayer);
+            List<Move> minMoveList = getMovesFunction.call(board, opponentPlayer, cpuPlayer);
 
             int bestMove = 9999;
 
             for (Move move : minMoveList) {
                 move.makeMove();
 
-                bestMove = Math.min(bestMove, alphaBeta(cells, alpha, beta, depth - 1, true));
+                bestMove = Math.min(bestMove, alphaBeta(board, alpha, beta, depth - 1, true));
 
                 move.undoMove();
 
@@ -107,7 +115,7 @@ public class CPU implements ICPU {
         int total = 0;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                total += Piece.value(cells[i][j].getToken(), opponentPlayer.getCharacter());
+                total += pieceValueFunction.call(cells[i][j].getToken(), opponentPlayer.getCharacter());
             }
         }
 
