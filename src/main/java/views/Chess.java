@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import game.BoardGame;
-import game.CPU;
 import game.Cell;
 import game.Move;
 import game.ui.CellPane;
@@ -479,20 +478,5 @@ public class Chess extends BoardGame {
             absValue = 900;
 
         return (token.startsWith(opponentChar)) ? absValue : -absValue;
-    }
-}
-
-class GetBestHumanMove extends Thread {
-    private Chess chess;
-
-    public GetBestHumanMove(Chess chess) {
-        this.chess = chess;
-    }
-
-    @Override
-    public void run() {
-        CPU cpu = chess.getCurrentCPU();
-
-        System.out.println("Your best move is: " + cpu.getBestMove());
     }
 }

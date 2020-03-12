@@ -1,8 +1,5 @@
 package game;
 
-import game.CPU;
-import game.Cell;
-import game.Move;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import game.ui.CellClickedHandler;
 import game.ui.CellPane;
@@ -376,7 +373,7 @@ public abstract class BoardGame {
     }
 
     // Test helper function
-    public void setBoard(Cell[][] board){
+    public void setBoard(Cell[][] board) {
         this.board = board;
     }
 }
