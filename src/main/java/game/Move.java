@@ -53,8 +53,13 @@ public class Move {
         return value;
     }
 
+    public List<Cell> getAttackedCells() {
+        return attackedCells;
+    }
+
     @Override
     public String toString() {
-        return "Move{" + "fromCell=" + fromCell + ", toCell=" + toCell + ", value=" + value + '}';
+        return "Move [fromCell=" + fromCell + ", toCell=" + toCell + ", value=" + value + ", attackedCells="
+                + attackedCells + "]";
     }
 }

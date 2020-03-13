@@ -16,7 +16,7 @@ public class Game extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        GameType type = GameType.CHESS;
+        GameType type = GameType.CHECKERS;
 
         MainMenu.render(primaryStage, e -> {
             Scene currentScene = primaryStage.getScene();
