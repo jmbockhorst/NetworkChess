@@ -63,7 +63,7 @@ public class Checkers extends BoardGame {
     }
 
     @Override
-    public List<Move> findMoves(Cell cell, Player player, Player opponent, boolean noLosingMoves) {
+    public List<Move> getValidMoves(Cell cell, Player player, Player opponent, boolean noLosingMoves) {
         List<Move> moves = new ArrayList<>();
 
         String playerChar = player.getCharacter();
@@ -72,12 +72,11 @@ public class Checkers extends BoardGame {
         int i = cell.getI();
         int j = cell.getJ();
 
-        int m = playerChar.equals("r") ? -1 : 1;
-
-        if ((m == 1 && i < 7) || (m == -1 && i > 0)) {
+        // Red moves
+        if ((playerChar.equals("r") || cell.getToken().endsWith("d")) && i > 0) {
             // Left diagonal
             if (j > 0) {
-                Cell toCell = board[i + m][j - 1];
+                Cell toCell = board[i - 1][j - 1];
                 if (toCell.getToken().equals("")) {
                     moves.add(new Move(cell, toCell, getPieceValue(toCell.getToken(), opponentChar)));
                 }
@@ -85,7 +84,26 @@ public class Checkers extends BoardGame {
 
             // Right diagonal
             if (j < 7) {
-                Cell toCell = board[i + m][j + 1];
+                Cell toCell = board[i - 1][j + 1];
+                if (toCell.getToken().equals("")) {
+                    moves.add(new Move(cell, toCell, getPieceValue(toCell.getToken(), opponentChar)));
+                }
+            }
+        }
+
+        // White moves
+        if ((playerChar.equals("w") || cell.getToken().endsWith("d")) && i < 7) {
+            // Left diagonal
+            if (j > 0) {
+                Cell toCell = board[i + 1][j - 1];
+                if (toCell.getToken().equals("")) {
+                    moves.add(new Move(cell, toCell, getPieceValue(toCell.getToken(), opponentChar)));
+                }
+            }
+
+            // Right diagonal
+            if (j < 7) {
+                Cell toCell = board[i + 1][j + 1];
                 if (toCell.getToken().equals("")) {
                     moves.add(new Move(cell, toCell, getPieceValue(toCell.getToken(), opponentChar)));
                 }
@@ -103,15 +121,14 @@ public class Checkers extends BoardGame {
         int i = cell.getI();
         int j = cell.getJ();
 
-        int m = playerChar.equals("r") ? -1 : 1;
-
         Cell startCell = lastMove == null ? cell : lastMove.fromCell;
 
-        if ((m == 1 && i < 6) || (m == -1 && i > 1)) {
+        // Red moves
+        if ((playerChar.equals("r") || startCell.getToken().endsWith("d")) && i > 1) {
             // Left jump diagonal
             if (j > 1) {
-                Cell toCell = board[i + m * 2][j - 2];
-                Cell jumpedCell = board[i + m][j - 1];
+                Cell toCell = board[i - 2][j - 2];
+                Cell jumpedCell = board[i - 1][j - 1];
                 if (toCell.getToken().equals("") && jumpedCell.getToken().startsWith(opponentChar)) {
                     handleNewAttackMove(lastMove, playerChar, opponentChar, moves, startCell, toCell, jumpedCell);
                 }
@@ -119,8 +136,29 @@ public class Checkers extends BoardGame {
 
             // Right jump diagonal
             if (j < 6) {
-                Cell toCell = board[i + m * 2][j + 2];
-                Cell jumpedCell = board[i + m][j + 1];
+                Cell toCell = board[i - 2][j + 2];
+                Cell jumpedCell = board[i - 1][j + 1];
+                if (toCell.getToken().equals("") && jumpedCell.getToken().startsWith(opponentChar)) {
+                    handleNewAttackMove(lastMove, playerChar, opponentChar, moves, startCell, toCell, jumpedCell);
+                }
+            }
+        }
+
+        // White moves
+        if ((playerChar.equals("w") || startCell.getToken().endsWith("d")) && i < 6) {
+            // Left jump diagonal
+            if (j > 1) {
+                Cell toCell = board[i + 2][j - 2];
+                Cell jumpedCell = board[i + 1][j - 1];
+                if (toCell.getToken().equals("") && jumpedCell.getToken().startsWith(opponentChar)) {
+                    handleNewAttackMove(lastMove, playerChar, opponentChar, moves, startCell, toCell, jumpedCell);
+                }
+            }
+
+            // Right jump diagonal
+            if (j < 6) {
+                Cell toCell = board[i + 2][j + 2];
+                Cell jumpedCell = board[i + 1][j + 1];
                 if (toCell.getToken().equals("") && jumpedCell.getToken().startsWith(opponentChar)) {
                     handleNewAttackMove(lastMove, playerChar, opponentChar, moves, startCell, toCell, jumpedCell);
                 }
@@ -146,6 +184,18 @@ public class Checkers extends BoardGame {
     }
 
     @Override
+    public void handleMoveMade(Cell cell) {
+        // Handle kings
+        if (cell.getI() == 0 && cell.getToken().equals("r")) {
+            cell.setToken("rd");
+        }
+
+        if (cell.getI() == 7 && cell.getToken().equals("w")) {
+            cell.setToken("wd");
+        }
+    }
+
+    @Override
     public boolean checkWin(Player player) {
         // TODO Auto-generated method stub
         return false;
@@ -153,13 +203,15 @@ public class Checkers extends BoardGame {
 
     @Override
     public int getPieceValue(String token, String opponentChar) {
-        if (token.startsWith(opponentChar)) {
-            return 10;
+        int absValue = 0;
+
+        if (token.endsWith("d")) {
+            absValue = 20;
         } else if (!token.equals("")) {
-            return -10;
+            absValue = 10;
         }
 
-        return 0;
+        return (token.startsWith(opponentChar)) ? absValue : -absValue;
     }
 
 }

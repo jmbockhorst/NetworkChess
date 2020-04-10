@@ -12,6 +12,8 @@ public class Move {
     private List<String> tempAttackedCells;
     private int value;
 
+    private MoveHandlerFunction moveHandlerFunction;
+
     public Move(Cell fromCell, Cell toCell, int value) {
         this.fromCell = fromCell;
         this.toCell = toCell;
@@ -38,6 +40,10 @@ public class Move {
             tempAttackedCells.add(cell.getToken());
             cell.setToken("");
         });
+
+        if (moveHandlerFunction != null) {
+            moveHandlerFunction.call(toCell);
+        }
     }
 
     public void undoMove() {
@@ -55,6 +61,10 @@ public class Move {
 
     public List<Cell> getAttackedCells() {
         return attackedCells;
+    }
+
+    public void setMoveHandlerFunction(MoveHandlerFunction moveHandlerFunction) {
+        this.moveHandlerFunction = moveHandlerFunction;
     }
 
     @Override
