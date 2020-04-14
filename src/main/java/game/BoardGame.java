@@ -6,13 +6,16 @@ import game.ui.CellPane;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import game.player.Player;
@@ -50,6 +53,7 @@ public abstract class BoardGame {
     protected CellPane[][] boardDisplay;
     private Label status = new Label();
     protected Label messageText = new Label();
+    private StackPane gameOverPane;
 
     private CellClickedHandler cellClickedHandler;
 
@@ -131,9 +135,6 @@ public abstract class BoardGame {
         status.setFont(Font.font("Times New Roman", 24));
         messageText.setFont(Font.font("Times New Roman", 24));
 
-        Button resetButton = new Button("Play Again");
-        resetButton.setOnMouseClicked(e -> resetGame());
-
         Button exitButton = new Button("Exit");
         exitButton.setOnAction(exitHandler);
 
@@ -146,11 +147,48 @@ public abstract class BoardGame {
         StackPane.setAlignment(status, Pos.CENTER);
         StackPane.setAlignment(messageText, Pos.CENTER_RIGHT);
 
-        BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(pane);
-        borderPane.setBottom(bottomRow);
+        BorderPane gameBorderPane = new BorderPane();
+        gameBorderPane.setCenter(pane);
+        gameBorderPane.setBottom(bottomRow);
 
-        stage.setScene(new Scene(borderPane, 600, 600));
+        gameOverPane = new StackPane();
+        gameOverPane.setStyle("-fx-background-color: #fff; -fx-border-color: black; -fx-border-width: 2px");
+
+        VBox gameOverBox = new VBox(5.0);
+
+        Label gameOver = new Label("Game Over");
+        gameOver.setFont(new Font(44.0));
+
+        Button resetButton = new Button("Play Again");
+        resetButton.setOnMouseClicked(e -> {
+            gameOverPane.setVisible(false);
+            resetGame();
+        });
+        resetButton.setFont(Font.font(35));
+        resetButton.setPadding(new Insets(20, 20, 20, 20));
+
+        Button mainMenuButton = new Button("Main menu");
+        mainMenuButton.setOnAction(exitHandler);
+        mainMenuButton.setFont(Font.font(35));
+        mainMenuButton.setPadding(new Insets(20, 20, 20, 20));
+
+        gameOverBox.getChildren().add(gameOver);
+        gameOverBox.getChildren().add(resetButton);
+        gameOverBox.getChildren().add(mainMenuButton);
+        gameOverBox.setAlignment(Pos.CENTER);
+
+        gameOverPane.getChildren().add(gameOverBox);
+        gameOverPane.setVisible(false);
+        gameOverPane.setMaxWidth(300);
+        gameOverPane.setMaxHeight(300);
+        gameOverPane.setAlignment(Pos.CENTER);
+
+        StackPane mainPane = new StackPane();
+        mainPane.getChildren().add(gameBorderPane);
+        mainPane.getChildren().add(gameOverPane);
+        StackPane.setAlignment(gameOverPane, Pos.CENTER);
+
+        stage.setScene(new Scene(mainPane, 600, 600));
     }
 
     public void renderBoard() {
@@ -286,6 +324,8 @@ public abstract class BoardGame {
     public void switchPlayerTurn() {
         if (checkWin(currentPlayer, getCurrentPlayerOpponent())) {
             status.setText("Game over - " + (currentPlayer.getCharacter().equals("b") ? "Black" : "White") + " wins");
+            gameOverPane.setVisible(true);
+            gameOverPane.toFront();
             return;
         }
 
