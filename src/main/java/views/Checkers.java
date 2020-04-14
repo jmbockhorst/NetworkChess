@@ -146,7 +146,7 @@ public class Checkers extends BoardGame {
     }
 
     @Override
-    public boolean checkWin(Player player) {
+    public boolean checkWin(Player player, Player opponentPlayer) {
         // TODO Auto-generated method stub
         return false;
     }

@@ -27,6 +27,21 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.9.10.3</version>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-controls -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>14</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-base -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-base</artifactId>
+      <version>14</version>
+    </dependency>
+
   </dependencies>
 
   <build>

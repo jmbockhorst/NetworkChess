@@ -444,10 +444,10 @@ public class Chess extends BoardGame {
     }
 
     @Override
-    public boolean checkWin(Player player) {
+    public boolean checkWin(Player player, Player opponentPlayer) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                if (board[i][j].getToken().equals(player.getCharacter() + "k")) {
+                if (board[i][j].getToken().equals(opponentPlayer.getCharacter() + "k")) {
                     return false;
                 }
             }

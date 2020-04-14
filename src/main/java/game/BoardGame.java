@@ -102,7 +102,7 @@ public abstract class BoardGame {
 
     public abstract List<Move> findMoves(Cell cell, Player player, Player opponent, boolean noLosingMoves);
 
-    public abstract boolean checkWin(Player player);
+    public abstract boolean checkWin(Player player, Player opponentPlayer);
 
     public abstract int getPieceValue(String token, String opponentChar);
 
@@ -280,7 +280,7 @@ public abstract class BoardGame {
     }
 
     public void switchPlayerTurn() {
-        if (checkWin(currentPlayer)) {
+        if (checkWin(currentPlayer, getCurrentPlayerOpponent())) {
             status.setText("Game over - " + (currentPlayer.getCharacter().equals("b") ? "Black" : "White") + " wins");
             return;
         }
