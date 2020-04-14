@@ -14,7 +14,7 @@ import javafx.scene.text.Text;
 public class CellPane extends Pane {
     private String imageName = "";
     private Cell cell;
-    private boolean debug = true;
+    private boolean debug = false;
 
     public CellPane(Cell cell, CellClickedHandler cellClickedHandler) {
         setStyle("-fx-border-color: black");

@@ -80,7 +80,7 @@ public class Chess extends BoardGame {
     }
 
     @Override
-    public List<Move> findMoves(Cell cell, Player player, Player opponent, boolean noLosingMoves) {
+    public List<Move> getValidMoves(Cell cell, Player player, Player opponent, boolean noLosingMoves) {
         List<Move> moves = new ArrayList<>();
 
         String playerChar = player.getCharacter();

@@ -100,7 +100,7 @@ public abstract class BoardGame {
 
     public abstract void setupBoardTokens();
 
-    public abstract List<Move> findMoves(Cell cell, Player player, Player opponent, boolean noLosingMoves);
+    public abstract List<Move> getValidMoves(Cell cell, Player player, Player opponent, boolean noLosingMoves);
 
     public abstract boolean checkWin(Player player, Player opponentPlayer);
 
@@ -111,6 +111,10 @@ public abstract class BoardGame {
 
     public boolean noLosingMoves() {
         return false;
+    }
+
+    public void handleMoveMade(Cell cell) {
+
     }
 
     public void render(Stage stage, EventHandler<ActionEvent> exitHandler) {
@@ -358,6 +362,15 @@ public abstract class BoardGame {
         moveList.sort(Comparator.comparing(Move::getValue).reversed());
 
         return moveList;
+    }
+
+    public List<Move> findMoves(Cell cell, Player player, Player opponent, boolean noLosingMoves) {
+        List<Move> moves = getValidMoves(cell, player, opponent, noLosingMoves);
+
+        moves.forEach(move -> {
+            move.setMoveHandlerFunction(c -> handleMoveMade(c));
+        });
+        return moves;
     }
 
     public Player getCurrentPlayer() {
