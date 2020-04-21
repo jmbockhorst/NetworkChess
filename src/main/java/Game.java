@@ -10,6 +10,8 @@ import views.NetworkMenu;
 
 public class Game extends Application {
 
+    private NetworkMenu networkMenu;
+
     public static void main(String[] args) {
         Application.launch(args);
     }
@@ -30,11 +32,17 @@ public class Game extends Application {
             game.start();
         }, e -> {
             Scene currentScene = primaryStage.getScene();
-            new NetworkMenu().render(primaryStage, ev -> primaryStage.setScene(currentScene));
+            networkMenu = new NetworkMenu();
+            networkMenu.render(primaryStage, ev -> primaryStage.setScene(currentScene));
         });
 
         primaryStage.setTitle("Chess");
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        networkMenu.stop();
     }
 
     public static BoardGame getGameInstance(GameType gameType, PlayerType playerType) {

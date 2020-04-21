@@ -42,11 +42,12 @@ public class GameServer {
 }
 
 class NetworkGameHandler implements Runnable {
-    Socket socket;
-    DataInputStream inputStream;
-    DataOutputStream outputStream;
-    ObjectMapper objectMapper;
-    List<NetworkGame> availableGames;
+    private final Socket socket;
+    private final List<NetworkGame> availableGames;
+    private DataInputStream inputStream;
+    private DataOutputStream outputStream;
+    private ObjectMapper objectMapper;
+    private NetworkGame createdGame = null;
 
     public NetworkGameHandler(Socket socket, List<NetworkGame> availableGames) {
         this.socket = socket;
@@ -68,8 +69,13 @@ class NetworkGameHandler implements Runnable {
         while (waitingToStart) {
             try {
                 String str;
-                while ((str = inputStream.readUTF()).equals(""))
-                    ;
+                while ((str = inputStream.readUTF()).equals("")) {
+                    // Keep waiting until another player has joined
+                    if (createdGame != null && availableGames.indexOf(createdGame) < 0) {
+                        // Another player has joined
+                        waitingToStart = false;
+                    }
+                }
 
                 // Send the list of games
                 if (str.equals("listGames")) {
@@ -106,12 +112,16 @@ class NetworkGameHandler implements Runnable {
                             : availableGames.stream().mapToInt(NetworkGame::getGameId).max().getAsInt() + 1;
                     String gameName = str.split("-")[1];
 
-                    availableGames.add(new NetworkGame(nextGameId, gameName, socket));
-
-                    waitingToStart = false;
+                    NetworkGame game = new NetworkGame(nextGameId, gameName, socket);
+                    availableGames.add(game);
+                    createdGame = game;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Client disconnected");
+                if (createdGame != null) {
+                    availableGames.removeIf(game -> game.getGameId() == createdGame.getGameId());
+                }
+
                 waitingToStart = false;
 
                 try {

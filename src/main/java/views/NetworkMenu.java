@@ -169,4 +169,12 @@ public class NetworkMenu {
 
         return games;
     }
+
+    public void stop() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -11,7 +11,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -136,7 +135,14 @@ public abstract class BoardGame {
         messageText.setFont(Font.font("Times New Roman", 24));
 
         Button exitButton = new Button("Exit");
-        exitButton.setOnAction(exitHandler);
+        exitButton.setOnAction(e -> {
+            exitHandler.handle(e);
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
 
         StackPane bottomRow = new StackPane();
 
@@ -168,7 +174,14 @@ public abstract class BoardGame {
         resetButton.setPadding(new Insets(20, 20, 20, 20));
 
         Button mainMenuButton = new Button("Main menu");
-        mainMenuButton.setOnAction(exitHandler);
+        mainMenuButton.setOnAction(e -> {
+            exitHandler.handle(e);
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
         mainMenuButton.setFont(Font.font(35));
         mainMenuButton.setPadding(new Insets(20, 20, 20, 20));
 
@@ -257,7 +270,7 @@ public abstract class BoardGame {
                     Platform.runLater(this::setUpBoard);
                     Platform.runLater(this::switchPlayerTurn);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println("Disconnected from server");
                 }
             }).start();
         } else {
