@@ -11,8 +11,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -21,16 +23,17 @@ import game.player.PlayerType;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NetworkMenu {
-
-    Socket socket;
-    DataInputStream inputStream;
-    DataOutputStream outputStream;
-    ObjectMapper objectMapper;
+    private EventHandler<ActionEvent> exitHandler;
+    private Socket socket;
+    private DataInputStream inputStream;
+    private DataOutputStream outputStream;
+    private ObjectMapper objectMapper;
 
     public NetworkMenu() {
         try {
@@ -44,6 +47,7 @@ public class NetworkMenu {
     }
 
     public void render(Stage stage, EventHandler<ActionEvent> exitHandler) {
+        this.exitHandler = exitHandler;
         BorderPane mainPane = new BorderPane();
 
         Button backButton = new Button("Back");
@@ -52,16 +56,28 @@ public class NetworkMenu {
 
         // Refresh button to reload the games list
         Button refreshButton = new Button("Refresh");
-        refreshButton.setFont(Font.font(30));
+        refreshButton.setFont(Font.font(20));
         refreshButton.setOnAction(e -> {
             mainPane.setCenter(getGamesList(stage, exitHandler));
         });
+
+        StackPane topPane = new StackPane();
+        topPane.getChildren().add(backButton);
+        topPane.getChildren().add(refreshButton);
+        StackPane.setAlignment(backButton, Pos.TOP_LEFT);
+
+        TextField gameNameField = new TextField();
+        gameNameField.setFont(Font.font(30));
+        gameNameField.setPromptText("Game name");
+        gameNameField.setMaxWidth(250);
+        gameNameField.setAlignment(Pos.CENTER);
 
         Button hostGameButton = new Button("Host game");
         hostGameButton.setFont(Font.font(30));
         hostGameButton.setOnAction(e -> {
             try {
-                String gameName = "Test game";
+                String gameName = !gameNameField.getText().equals("") ? gameNameField.getText()
+                        : InetAddress.getLocalHost().getHostName();
 
                 // Send the start game request
                 outputStream.writeUTF("create-" + gameName);
@@ -80,16 +96,15 @@ public class NetworkMenu {
             }
         });
 
-        HBox buttonGroup = new HBox();
-        buttonGroup.setAlignment(Pos.BOTTOM_CENTER);
-        buttonGroup.setSpacing(20);
-        buttonGroup.getChildren().add(hostGameButton);
-        buttonGroup.getChildren().add(refreshButton);
+        HBox hostGameGroup = new HBox(20);
+        hostGameGroup.setAlignment(Pos.BOTTOM_CENTER);
+        hostGameGroup.getChildren().add(gameNameField);
+        hostGameGroup.getChildren().add(hostGameButton);
 
         mainPane.setPadding(new Insets(10));
-        mainPane.setTop(backButton);
+        mainPane.setTop(topPane);
         mainPane.setCenter(getGamesList(stage, exitHandler));
-        mainPane.setBottom(buttonGroup);
+        mainPane.setBottom(hostGameGroup);
 
         stage.setScene(new Scene(mainPane, 600, 600));
     }
@@ -158,7 +173,8 @@ public class NetworkMenu {
             JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, NetworkGameClient.class);
             games = objectMapper.readValue(str, type);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Cannot connect to the server");
+            Platform.runLater(() -> exitHandler.handle(null));
 
             try {
                 socket.close();

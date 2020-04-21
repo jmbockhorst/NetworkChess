@@ -12,17 +12,44 @@
         },
         {
             "type": "java",
-            "name": "Debug (Launch)-Game<NetworkChess>",
+            "name": "Launch Game",
             "request": "launch",
             "mainClass": "Game",
-            "projectName": "NetworkChess"
+            "projectName": "NetworkChess",
         },
         {
             "type": "java",
-            "name": "Debug (Launch)-GameServer<NetworkChess>",
+            "name": "Launch Game Server",
             "request": "launch",
             "mainClass": "GameServer",
             "projectName": "NetworkChess"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Server and Client",
+            "configurations": [
+                "Launch Game Server",
+                "Launch Game"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "compounds",
+                "order": 1
+            }
+        },
+        {
+            "name": "Server and 2 Clients",
+            "configurations": [
+                "Launch Game Server",
+                "Launch Game",
+                "Launch Game"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "compounds",
+                "order": 1
+            }
         }
     ]
 }

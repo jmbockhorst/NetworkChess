@@ -9,7 +9,6 @@ import views.MainMenu;
 import views.NetworkMenu;
 
 public class Game extends Application {
-
     private NetworkMenu networkMenu;
 
     public static void main(String[] args) {

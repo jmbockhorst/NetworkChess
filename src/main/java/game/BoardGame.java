@@ -55,6 +55,7 @@ public abstract class BoardGame {
     private StackPane gameOverPane;
 
     private CellClickedHandler cellClickedHandler;
+    private EventHandler<ActionEvent> exitHandler;
 
     // Needed for network games
     private Socket socket;
@@ -91,6 +92,8 @@ public abstract class BoardGame {
                 inputStream = new DataInputStream(socket.getInputStream());
                 outputStream = new DataOutputStream(socket.getOutputStream());
                 objectMapper = new ObjectMapper();
+
+                new Thread(() -> handleNetworkDisconnect()).start();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -121,6 +124,8 @@ public abstract class BoardGame {
     }
 
     public void render(Stage stage, EventHandler<ActionEvent> exitHandler) {
+        this.exitHandler = exitHandler;
+
         GridPane pane = new GridPane();
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
@@ -239,11 +244,11 @@ public abstract class BoardGame {
 
     public void start() {
         if (!gameReady) {
-            status.setText("Waiting on game.player...");
+            status.setText("Waiting on other player...");
         }
 
         if (player2.getType() == PlayerType.NETWORK) {
-            // Wait for the game.player in a new thread
+            // Wait for the player in a new thread
             new Thread(() -> {
                 try {
                     // Wait for the game to start
@@ -251,12 +256,12 @@ public abstract class BoardGame {
                     while (!(str = inputStream.readUTF()).startsWith("start"))
                         ;
 
-                    // Get the game.player id
+                    // Get the player id
                     int player = Integer.valueOf(str.substring(str.length() - 1));
 
                     System.out.println("Player id: " + player);
 
-                    // If we are game.player 2, swap the players
+                    // If we are player 2, swap the players
                     if (player == 2) {
                         player1 = new Player(PlayerType.NETWORK, player1.getCharacter());
                         player2 = new Player(PlayerType.HUMAN, player2.getCharacter());
@@ -271,6 +276,7 @@ public abstract class BoardGame {
                     Platform.runLater(this::switchPlayerTurn);
                 } catch (IOException e) {
                     System.out.println("Disconnected from server");
+                    Platform.runLater(() -> exitHandler.handle(null));
                 }
             }).start();
         } else {
@@ -306,6 +312,7 @@ public abstract class BoardGame {
         try {
             // Send the board if needed
             if (sendNetworkData) {
+                System.out.println("Sending board");
                 outputStream.writeUTF(objectMapper.writeValueAsString(board));
                 outputStream.flush();
             }
@@ -313,7 +320,7 @@ public abstract class BoardGame {
             e.printStackTrace();
         }
 
-        // Wait on the other game.player in a new thread
+        // Wait on the other player in a new thread
         new Thread(() -> {
             try {
                 // Wait for the new board
@@ -329,7 +336,8 @@ public abstract class BoardGame {
                 Platform.runLater(this::renderBoard);
                 Platform.runLater(this::switchPlayerTurn);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                System.out.println("Disconnected from server");
+                Platform.runLater(() -> exitHandler.handle(null));
             }
         }).start();
     }
@@ -350,7 +358,7 @@ public abstract class BoardGame {
             status.setText("CPU is thinking...");
             cpuTurn();
         } else if (currentPlayer.getType() == PlayerType.NETWORK) {
-            status.setText("Waiting on game.player...");
+            status.setText("Waiting on other player...");
             networkTurn();
         } else {
             if (player1.getType() == PlayerType.HUMAN && player2.getType() == PlayerType.HUMAN) {
@@ -363,6 +371,13 @@ public abstract class BoardGame {
                 status.setText("Your turn");
             }
         }
+    }
+
+    private void handleNetworkDisconnect() {
+        while (socket.isConnected())
+            ;
+
+        Platform.runLater(() -> exitHandler.handle(null));
     }
 
     public void clearMoves() {

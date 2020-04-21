@@ -399,7 +399,7 @@ public class Chess extends BoardGame {
             for (Iterator<Move> iterator = moves.iterator(); iterator.hasNext();) {
                 Move move = iterator.next();
 
-                // Check if making this move causes the other game.player to win
+                // Check if making this move causes the other player to win
                 move.makeMove();
 
                 boolean foundWinningMove = false;

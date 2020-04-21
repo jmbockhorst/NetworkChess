@@ -25,6 +25,8 @@ public class GameServer {
             serverSocket = new ServerSocket(8000);
             availableGames = new ArrayList<>();
 
+            System.out.println("Game server started");
+
             while (true) {
                 // Handle when a new connection is made
                 new Thread(new NetworkGameHandler(serverSocket.accept(), availableGames)).start();
@@ -148,7 +150,7 @@ class TwoPlayerConnectionHandler implements Runnable {
         this.socket1 = socket1;
         this.socket2 = socket2;
 
-        System.out.println("Server connected");
+        System.out.println("Server game created");
 
         try {
             inputStream1 = new DataInputStream(socket1.getInputStream());
@@ -170,42 +172,55 @@ class TwoPlayerConnectionHandler implements Runnable {
     @Override
     public void run() {
         try {
-            // Wait for the board from game.player 1
+            // Wait for the board from player 1
             String str;
-            while ((str = inputStream1.readUTF()).equals(""))
-                ;
+            while ((str = inputStream1.readUTF()).equals("")) {
+                if (socket1.isClosed() || socket2.isClosed()) {
+                    throw new IOException();
+                }
+            }
 
-            System.out.println("Received data from game.player 1");
+            System.out.println("Received data from player 1");
 
+            System.out.println(str);
             board = objectMapper.readValue(str, Cell[][].class);
 
-            // Send the board to game.player 2
+            // Send the board to player 2
             outputStream2.writeUTF(objectMapper.writeValueAsString(board));
             outputStream2.flush();
 
-            System.out.println("Sent data to game.player 2");
+            System.out.println("Sent data to player 2");
 
-            // Wait for the board from game.player 2
+            // Wait for the board from player 2
             String str2;
-            while ((str2 = inputStream2.readUTF()).equals(""))
-                ;
+            while ((str2 = inputStream2.readUTF()).equals("")) {
+                if (socket1.isClosed() || socket2.isClosed()) {
+                    throw new IOException();
+                }
+            }
 
-            System.out.println("Received data from game.player 2");
+            System.out.println("Received data from player 2");
 
             board = objectMapper.readValue(str2, Cell[][].class);
 
-            // Send the board to game.player 1
+            // Send the board to player 1
             outputStream1.writeUTF(objectMapper.writeValueAsString(board));
             outputStream1.flush();
 
-            System.out.println("Sent data to game.player 1");
+            System.out.println("Sent data to player 1");
 
             run();
         } catch (IOException e) {
+            System.out.println("One of the clients has disconnected");
             e.printStackTrace();
 
             try {
                 socket1.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+            try {
                 socket2.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
