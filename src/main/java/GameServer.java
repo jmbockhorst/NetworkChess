@@ -49,7 +49,7 @@ class NetworkGameHandler implements Runnable {
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
     private ObjectMapper objectMapper;
-    private NetworkGame createdGame = null;
+    private NetworkGame createdGame;
 
     public NetworkGameHandler(Socket socket, List<NetworkGame> availableGames) {
         this.socket = socket;
@@ -71,13 +71,7 @@ class NetworkGameHandler implements Runnable {
         while (waitingToStart) {
             try {
                 String str;
-                while ((str = inputStream.readUTF()).equals("")) {
-                    // Keep waiting until another player has joined
-                    if (createdGame != null && availableGames.indexOf(createdGame) < 0) {
-                        // Another player has joined
-                        waitingToStart = false;
-                    }
-                }
+                while ((str = inputStream.readUTF()).equals(""));
 
                 // Send the list of games
                 if (str.equals("listGames")) {
@@ -117,6 +111,7 @@ class NetworkGameHandler implements Runnable {
                     NetworkGame game = new NetworkGame(nextGameId, gameName, socket);
                     availableGames.add(game);
                     createdGame = game;
+                    waitingToStart = false;
                 }
             } catch (Exception e) {
                 System.out.println("Client disconnected");
@@ -137,14 +132,14 @@ class NetworkGameHandler implements Runnable {
 }
 
 class TwoPlayerConnectionHandler implements Runnable {
-    Socket socket1;
-    Socket socket2;
-    DataInputStream inputStream1;
-    DataOutputStream outputStream1;
-    DataInputStream inputStream2;
-    DataOutputStream outputStream2;
-    ObjectMapper objectMapper;
-    Cell[][] board;
+    private final Socket socket1;
+    private final Socket socket2;
+    private DataInputStream inputStream1;
+    private DataOutputStream outputStream1;
+    private DataInputStream inputStream2;
+    private DataOutputStream outputStream2;
+    private ObjectMapper objectMapper;
+    private Cell[][] board;
 
     public TwoPlayerConnectionHandler(Socket socket1, Socket socket2) {
         this.socket1 = socket1;
@@ -172,6 +167,7 @@ class TwoPlayerConnectionHandler implements Runnable {
     @Override
     public void run() {
         try {
+            System.out.println("Starting game loop");
             // Wait for the board from player 1
             String str;
             while ((str = inputStream1.readUTF()).equals("")) {
@@ -182,7 +178,6 @@ class TwoPlayerConnectionHandler implements Runnable {
 
             System.out.println("Received data from player 1");
 
-            System.out.println(str);
             board = objectMapper.readValue(str, Cell[][].class);
 
             // Send the board to player 2

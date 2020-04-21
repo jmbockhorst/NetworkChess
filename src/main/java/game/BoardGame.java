@@ -54,7 +54,6 @@ public abstract class BoardGame {
     protected Label messageText = new Label();
     private StackPane gameOverPane;
 
-    private CellClickedHandler cellClickedHandler;
     private EventHandler<ActionEvent> exitHandler;
 
     // Needed for network games
@@ -93,13 +92,11 @@ public abstract class BoardGame {
                 outputStream = new DataOutputStream(socket.getOutputStream());
                 objectMapper = new ObjectMapper();
 
-                new Thread(() -> handleNetworkDisconnect()).start();
+                new Thread(this::handleNetworkDisconnect).start();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
-        cellClickedHandler = cell -> handleCellClick(cell);
     }
 
     public abstract void renderCell(CellPane cellPane, Cell cell);
@@ -130,7 +127,7 @@ public abstract class BoardGame {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 board[i][j] = new Cell(i, j);
-                pane.add(boardDisplay[i][j] = new CellPane(board[i][j], cellClickedHandler), j, i);
+                pane.add(boardDisplay[i][j] = new CellPane(board[i][j], this::handleCellClick), j, i);
             }
         }
 
@@ -209,7 +206,7 @@ public abstract class BoardGame {
         stage.setScene(new Scene(mainPane, 600, 600));
     }
 
-    public void renderBoard() {
+    private void renderBoard() {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 // Swap the row and col if it should be
@@ -231,7 +228,7 @@ public abstract class BoardGame {
         renderBoard();
     }
 
-    public void resetGame() {
+    private void resetGame() {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 board[i][j].setToken("");

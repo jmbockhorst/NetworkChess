@@ -20,9 +20,9 @@ public class CellPane extends Pane {
         setStyle("-fx-border-color: black");
         this.setPrefSize(2000, 2000);
 
-        this.setOnMouseClicked(e -> cellClickedHandler.handleCellClicked(cell));
-
         this.cell = cell;
+
+        this.setOnMouseClicked(e -> cellClickedHandler.handleCellClicked(this.cell));
     }
 
     public void setImage(String token) {
