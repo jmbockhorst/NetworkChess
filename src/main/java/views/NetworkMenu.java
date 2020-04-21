@@ -6,12 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import game.player.PlayerType;
 
@@ -44,15 +47,18 @@ public class NetworkMenu {
         BorderPane mainPane = new BorderPane();
 
         Button backButton = new Button("Back");
+        backButton.setFont(Font.font(20));
         backButton.setOnAction(exitHandler);
 
         // Refresh button to reload the games list
         Button refreshButton = new Button("Refresh");
+        refreshButton.setFont(Font.font(30));
         refreshButton.setOnAction(e -> {
             mainPane.setCenter(getGamesList(stage, exitHandler));
         });
 
         Button hostGameButton = new Button("Host game");
+        hostGameButton.setFont(Font.font(30));
         hostGameButton.setOnAction(e -> {
             try {
                 String gameName = "Test game";
@@ -75,9 +81,12 @@ public class NetworkMenu {
         });
 
         HBox buttonGroup = new HBox();
+        buttonGroup.setAlignment(Pos.BOTTOM_CENTER);
+        buttonGroup.setSpacing(20);
         buttonGroup.getChildren().add(hostGameButton);
         buttonGroup.getChildren().add(refreshButton);
 
+        mainPane.setPadding(new Insets(10));
         mainPane.setTop(backButton);
         mainPane.setCenter(getGamesList(stage, exitHandler));
         mainPane.setBottom(buttonGroup);
@@ -89,14 +98,20 @@ public class NetworkMenu {
         List<NetworkGameClient> games = getGames();
 
         VBox box = new VBox();
+        box.setPadding(new Insets(20));
+        box.setAlignment(Pos.TOP_CENTER);
         box.setSpacing(10.0);
 
         games.forEach(networkGame -> {
             HBox gameBox = new HBox();
+            gameBox.setAlignment(Pos.CENTER);
             gameBox.setSpacing(10.0);
 
             Label nameLabel = new Label(networkGame.getName());
+            nameLabel.setFont(Font.font(30));
+
             Button joinButton = new Button("Join");
+            joinButton.setFont(Font.font(30));
 
             joinButton.setOnAction(e -> {
                 try {
