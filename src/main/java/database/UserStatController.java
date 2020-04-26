@@ -8,7 +8,7 @@ public class UserStatController {
     }
 
     public UserStat get(String userId) {
-        return userStatDAO.list().stream().filter(stat -> stat.getUserId().equals(userId)).findFirst().orElseGet(null);
+        return userStatDAO.list().stream().filter(stat -> stat.getUserId().equals(userId)).findFirst().orElse(null);
     }
 
     public void addWin(String userId) {

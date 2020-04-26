@@ -7,6 +7,7 @@ import views.Checkers;
 import views.Chess;
 import views.MainMenu;
 import views.NetworkMenu;
+import views.StatsView;
 
 public class Game extends Application {
     private NetworkMenu networkMenu;
@@ -33,6 +34,9 @@ public class Game extends Application {
             Scene currentScene = primaryStage.getScene();
             networkMenu = new NetworkMenu();
             networkMenu.render(primaryStage, ev -> primaryStage.setScene(currentScene));
+        }, e -> {
+            Scene currentScene = primaryStage.getScene();
+            new StatsView().render(primaryStage, ev -> primaryStage.setScene(currentScene));
         });
 
         primaryStage.setTitle("Chess");
@@ -41,7 +45,9 @@ public class Game extends Application {
 
     @Override
     public void stop() throws Exception {
-        networkMenu.stop();
+        if(networkMenu != null) {
+            networkMenu.stop();
+        }
     }
 
     public static BoardGame getGameInstance(GameType gameType, PlayerType playerType) {

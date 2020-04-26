@@ -1,6 +1,8 @@
 package game;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import database.UserStatController;
 import game.ui.CellClickedHandler;
 import game.ui.CellPane;
 import javafx.application.Platform;
@@ -23,7 +25,9 @@ import game.player.PlayerType;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -65,8 +69,12 @@ public abstract class BoardGame {
     private boolean gameReady = true;
     private boolean sendNetworkData = true;
 
+    private UserStatController userStatController;
+
     public BoardGame(int boardWidth, int boardHeight, String player1Char, String player2Char, PlayerType opponentType,
             Socket socket) {
+        userStatController = new UserStatController();
+
         boardDisplay = new CellPane[boardHeight][boardWidth];
         board = new Cell[boardHeight][boardWidth];
 
@@ -179,7 +187,9 @@ public abstract class BoardGame {
         mainMenuButton.setOnAction(e -> {
             exitHandler.handle(e);
             try {
-                socket.close();
+                if(socket != null) {
+                    socket.close();
+                }
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -342,6 +352,23 @@ public abstract class BoardGame {
     public void switchPlayerTurn() {
         if (checkWin(currentPlayer, getCurrentPlayerOpponent())) {
             status.setText("Game over - " + (currentPlayer.getCharacter().equals("b") ? "Black" : "White") + " wins");
+
+            if (currentPlayer.getType() == PlayerType.HUMAN
+                    && getCurrentPlayerOpponent().getType() != PlayerType.HUMAN) {
+                try {
+                    userStatController.addWin(InetAddress.getLocalHost().getHostName());
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+            } else if (currentPlayer.getType() != PlayerType.HUMAN
+                    && getCurrentPlayerOpponent().getType() == PlayerType.HUMAN) {
+                try {
+                    userStatController.addLoss(InetAddress.getLocalHost().getHostName());
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+            }
+
             gameOverPane.setVisible(true);
             gameOverPane.toFront();
             return;

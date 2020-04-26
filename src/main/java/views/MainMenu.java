@@ -14,7 +14,8 @@ import javafx.stage.Stage;
 public class MainMenu {
 
     public static void render(Stage stage, EventHandler<ActionEvent> singlePlayerHandler,
-            EventHandler<ActionEvent> multiPlayerHandler, EventHandler<ActionEvent> networkGameHandler) {
+            EventHandler<ActionEvent> multiPlayerHandler, EventHandler<ActionEvent> networkGameHandler,
+            EventHandler<ActionEvent> statsPageHandler) {
         BorderPane mainPane = new BorderPane();
 
         VBox gameMenu = new VBox();
@@ -45,6 +46,13 @@ public class MainMenu {
         StackPane pane = new StackPane(title);
         pane.setAlignment(Pos.CENTER);
         mainPane.setTop(pane);
+
+        Button statsButton = new Button("Stats");
+        statsButton.setOnAction(statsPageHandler);
+        statsButton.setFont(Font.font(20));
+
+        mainPane.setBottom(statsButton);
+        BorderPane.setAlignment(statsButton, Pos.CENTER);
 
         stage.setScene(new Scene(mainPane, 600, 600));
     }
