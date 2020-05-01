@@ -2,9 +2,10 @@
 
 ## Prerequisites
 
-- Java 14
+- Java 8
 - Maven
 
 ```sh
-mvn clean install
+mvn clean package
+java -jar NetworkChess-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```

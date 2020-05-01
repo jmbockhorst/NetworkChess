@@ -148,7 +148,9 @@ public abstract class BoardGame {
         exitButton.setOnAction(e -> {
             exitHandler.handle(e);
             try {
-                socket.close();
+                if (socket != null) {
+                    socket.close();
+                }
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -187,7 +189,7 @@ public abstract class BoardGame {
         mainMenuButton.setOnAction(e -> {
             exitHandler.handle(e);
             try {
-                if(socket != null) {
+                if (socket != null) {
                     socket.close();
                 }
             } catch (IOException ex) {

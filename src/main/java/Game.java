@@ -45,7 +45,7 @@ public class Game extends Application {
 
     @Override
     public void stop() throws Exception {
-        if(networkMenu != null) {
+        if (networkMenu != null) {
             networkMenu.stop();
         }
     }

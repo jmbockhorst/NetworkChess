@@ -2,7 +2,7 @@ drop database if exists network_chess;
 create database network_chess;
 use network_chess;
 
-CREATE OR REPLACE USER `chess_user`@`localhost` IDENTIFIED BY 'chess_user';
+CREATE USER `chess_user`@`localhost` IDENTIFIED BY 'chess_user';
 GRANT ALL PRIVILEGES ON network_chess.* TO `chess_user`@`localhost` WITH GRANT OPTION;
 
 create table user_stat (
